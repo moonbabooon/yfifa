@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FIFA World Cup 2026 · Canada vs Bosnia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <header id="header">
+    <div class="fifa-title">FIFA WORLD CUP 2026™</div>
+    <div class="match-venue">GROUP STAGE &nbsp;·&nbsp; BMO FIELD, TORONTO</div>
+  </header>
+
+  <div id="vs-banner">
+    <div class="team canada-team">
+      <img src="https://flagcdn.com/w160/ca.png" alt="Canada" class="team-flag" />
+      <span class="team-name">CANADA</span>
+    </div>
+    <div class="vs-core">
+      <div class="vs-text">VS</div>
+      <div class="match-date">JUNE 2026 · 19:00 ET</div>
+    </div>
+    <div class="team bosnia-team">
+      <img src="https://flagcdn.com/w160/ba.png" alt="Bosnia &amp; Herzegovina" class="team-flag" />
+      <span class="team-name">BOSNIA &amp; HERZ.</span>
+    </div>
+  </div>
+
+  <div id="tooltip"></div>
+
+  <div id="info-panel">
+    <button id="panel-close">✕</button>
+    <div class="panel-trophy-icon">🏆</div>
+    <h2>FIFA World Cup 2026™</h2>
+    <p class="panel-subtitle">Group Stage · Matchday 1</p>
+    <div class="panel-details">
+      <div class="detail-row"><span class="detail-icon">📍</span><span>BMO Field, Toronto, Canada</span></div>
+      <div class="detail-row"><span class="detail-icon">📅</span><span>June 2026</span></div>
+      <div class="detail-row"><span class="detail-icon">🕗</span><span>19:00 ET Kickoff</span></div>
+      <div class="detail-row"><span class="detail-icon">🎟️</span><span>You're invited</span></div>
+    </div>
+    <p class="panel-body">Join us for Canada's first World Cup home game — a historic moment at BMO Field, Toronto.</p>
+  </div>
+
+  <div id="hint">drag to explore &nbsp;·&nbsp; click the trophy</div>
+
+  <div id="ball-btn">
+    <div class="ball-wrap">⚽</div>
+    <span>RSVP</span>
+  </div>
+
+  <div id="contact-overlay"></div>
+  <div id="contact-modal">
+    <button id="contact-close">✕</button>
+    <div class="modal-flags">
+      <img src="https://flagcdn.com/w80/ca.png" alt="Canada" />
+      <span class="modal-vs">VS</span>
+      <img src="https://flagcdn.com/w80/ba.png" alt="Bosnia" />
+    </div>
+    <h2 class="contact-title">Are You Coming?</h2>
+    <p class="contact-sub">RSVP for the match</p>
+    <form id="contact-form" novalidate>
+      <input type="text"   name="from_name"  placeholder="Your name"            required />
+      <input type="email"  name="from_email" placeholder="Your email"           required />
+      <input type="number" name="guests"     placeholder="Seats needed (1–10)"  min="1" max="10" />
+      <textarea            name="message"    placeholder="Any notes..."         rows="3"></textarea>
+      <button type="submit" id="send-btn">Kick it in! <span class="btn-ball">⚽</span></button>
+    </form>
+  </div>
+
+  <div id="success-toast">You're on the team sheet! See you in Toronto 🍁</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>emailjs.init('YOUR_PUBLIC_KEY');</script>
+  <script src="contact.js"></script>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three":         "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
