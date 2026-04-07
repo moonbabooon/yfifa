@@ -233,7 +233,7 @@ const trophyMeshes = [];
 
 const trophyTex = new THREE.TextureLoader().load('tex/texture0.jpg', tex => {
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.flipY = false;
+  tex.flipY = true;
 });
 
 new OBJLoader().load(
