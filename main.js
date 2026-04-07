@@ -216,57 +216,98 @@ const goalFar  = makeGoal(-30); // Canada's goal (far, z=-30)
 const goalNear = makeGoal(30);  // Bosnia's goal (near, z=+30)
 
 // ── Trophy ────────────────────────────────────────────────────────────────────
+function makeGlobeTex() {
+  const W = 256, H = 128;
+  const cvs = document.createElement('canvas');
+  cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+  ctx.fillStyle = '#1a4a8a';
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#1e6e1e';
+  // Rough continent blobs
+  [
+    [55, 40, 22, 26, -0.3],  // N America
+    [75, 78, 13, 20,  0.2],  // S America
+    [128, 36, 10, 14,  0  ], // Europe
+    [130, 65, 15, 27,  0.1], // Africa
+    [178, 36, 38, 20,  0.1], // Asia
+    [197, 82, 14,  9,  0.2], // Australia
+  ].forEach(([x, y, rx, ry, rot]) => {
+    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2); ctx.fill();
+  });
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
 function makeTrophy() {
   const group = new THREE.Group();
-  const gold = new THREE.MeshStandardMaterial({ color: 0xd4a820, metalness: 0.96, roughness: 0.12 });
-  const dkGold = new THREE.MeshStandardMaterial({ color: 0x8b6410, metalness: 0.92, roughness: 0.28 });
+  const gold     = new THREE.MeshStandardMaterial({ color: 0xd4a820, metalness: 0.97, roughness: 0.10 });
+  const dkGold   = new THREE.MeshStandardMaterial({ color: 0x8b6410, metalness: 0.93, roughness: 0.25 });
+  const malamat  = new THREE.MeshStandardMaterial({ color: 0x1a5c1a, metalness: 0.25, roughness: 0.75 });
+  const figureMat= new THREE.MeshStandardMaterial({ color: 0xc89010, metalness: 0.98, roughness: 0.08 });
 
-  // Base tiers
-  const t1 = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.7, 0.28, 20), dkGold);
-  t1.position.y = 0.14;
-  const t2 = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.5, 0.22, 20), dkGold);
-  t2.position.y = 0.5;
-  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.7, 2.0, 20), gold);
-  shaft.position.y = 1.61;
+  // ── Octagonal malachite base ─────────────────────────────────────
+  const b1 = new THREE.Mesh(new THREE.CylinderGeometry(1.85, 2.05, 0.20, 8), dkGold);  b1.position.y = 0.10;
+  const m1 = new THREE.Mesh(new THREE.CylinderGeometry(1.80, 1.85, 0.20, 8), malamat); m1.position.y = 0.40;
+  const g1 = new THREE.Mesh(new THREE.CylinderGeometry(1.70, 1.80, 0.08, 8), gold);    g1.position.y = 0.64;
+  const m2 = new THREE.Mesh(new THREE.CylinderGeometry(1.58, 1.70, 0.20, 8), malamat); m2.position.y = 0.78;
+  const b2 = new THREE.Mesh(new THREE.CylinderGeometry(1.20, 1.58, 0.18, 8), dkGold); b2.position.y = 1.06;
+  // Narrowing pedestal
+  const ped= new THREE.Mesh(new THREE.CylinderGeometry(0.52, 1.20, 0.28, 16), gold);  ped.position.y = 1.29;
+  group.add(b1, m1, g1, m2, b2, ped);
 
-  // Cup bowl (lathe)
-  const lp = [
-    new THREE.Vector2(0.32, 0),
-    new THREE.Vector2(0.42, 0.25),
-    new THREE.Vector2(0.72, 0.6),
-    new THREE.Vector2(1.1, 1.1),
-    new THREE.Vector2(1.38, 1.6),
-    new THREE.Vector2(1.42, 2.0),
-    new THREE.Vector2(1.3, 2.4),
-    new THREE.Vector2(1.05, 2.72),
-    new THREE.Vector2(0.9, 2.85),
-  ];
-  const cup = new THREE.Mesh(new THREE.LatheGeometry(lp, 32), gold);
-  cup.position.y = 2.61;
-
-  // Handles (D-shaped tori)
-  [-1, 1].forEach(side => {
-    const h = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.1, 8, 20, Math.PI), gold);
-    h.position.set(side * 1.42, 4.6, 0);
-    h.rotation.z = side * (Math.PI / 2);
-    group.add(h);
+  // ── Two human figures ────────────────────────────────────────────
+  const FY = 1.43; // figure base y
+  [-1, 1].forEach(s => {
+    // Body: feet → hips → torso → shoulders
+    const bodyPts = [
+      new THREE.Vector3(s * 0.22, FY + 0.00, 0),
+      new THREE.Vector3(s * 0.40, FY + 0.35, 0),
+      new THREE.Vector3(s * 0.58, FY + 0.80, 0),
+      new THREE.Vector3(s * 0.68, FY + 1.30, 0), // widest
+      new THREE.Vector3(s * 0.60, FY + 1.80, 0),
+      new THREE.Vector3(s * 0.42, FY + 2.20, 0), // shoulders
+    ];
+    group.add(new THREE.Mesh(
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(bodyPts), 20, 0.115, 8),
+      figureMat
+    ));
+    // Head
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.155, 10, 10), figureMat);
+    head.position.set(s * 0.58, FY + 1.55, 0);
+    group.add(head);
+    // Arms reaching up to globe
+    const armPts = [
+      new THREE.Vector3(s * 0.42, FY + 2.20, 0),
+      new THREE.Vector3(s * 0.28, FY + 2.55, 0),
+      new THREE.Vector3(s * 0.14, FY + 2.82, 0),
+    ];
+    group.add(new THREE.Mesh(
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(armPts), 10, 0.075, 8),
+      figureMat
+    ));
   });
 
-  // Globe on top
+  // ── Globe ────────────────────────────────────────────────────────
+  const GY = FY + 3.08;
+  const ringMesh = new THREE.Mesh(new THREE.TorusGeometry(0.52, 0.065, 8, 32), gold);
+  ringMesh.position.y = GY - 0.12;
   const globe = new THREE.Mesh(
-    new THREE.SphereGeometry(0.52, 20, 20),
-    new THREE.MeshStandardMaterial({ color: 0x1a4a8a, metalness: 0.65, roughness: 0.35 })
+    new THREE.SphereGeometry(0.54, 28, 28),
+    new THREE.MeshStandardMaterial({ map: makeGlobeTex(), metalness: 0.3, roughness: 0.5 })
   );
-  globe.position.y = 5.96;
+  globe.position.y = GY;
+  group.add(ringMesh, globe);
 
-  // Glow aura
+  // ── Glow aura ────────────────────────────────────────────────────
   const aura = new THREE.Mesh(
-    new THREE.SphereGeometry(4, 16, 16),
-    new THREE.MeshBasicMaterial({ color: 0xd4a820, transparent: true, opacity: 0.035, side: THREE.BackSide })
+    new THREE.SphereGeometry(4.2, 16, 16),
+    new THREE.MeshBasicMaterial({ color: 0xd4a820, transparent: true, opacity: 0.032, side: THREE.BackSide })
   );
-  aura.position.y = 3;
+  aura.position.y = 2.5;
+  group.add(aura);
 
-  group.add(t1, t2, shaft, cup, globe, aura);
   group.scale.setScalar(1.55);
   group.position.set(0, 0.01, 0);
   scene.add(group);

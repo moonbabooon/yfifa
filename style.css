@@ -263,37 +263,98 @@ body {
   text-transform: uppercase;
 }
 
-/* ── Ball RSVP Button ────────────────────────────────────────────── */
-#ball-btn {
+/* ── RSVP CTA ────────────────────────────────────────────────────── */
+#rsvp-cta {
   position: fixed;
   bottom: 28px; right: 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  cursor: pointer;
+  gap: 10px;
   z-index: 15;
-  transition: transform 0.2s;
+}
+
+/* Pulsing attention rings */
+.pulse-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 90px; height: 90px;
+  margin: -45px 0 0 -45px;
+  border: 2px solid rgba(201,162,39,0.7);
+  border-radius: 50%;
+  animation: rsvpPulse 2.4s ease-out infinite;
+  pointer-events: none;
+}
+.pulse-ring.r2 { animation-delay: 1.2s; }
+
+@keyframes rsvpPulse {
+  0%   { transform: scale(0.7); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+#ball-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(201,162,39,0.45);
+  border-radius: 50px;
+  padding: 10px 20px 10px 12px;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
   user-select: none;
 }
-#ball-btn:hover { transform: scale(1.12) rotate(-6deg); }
-
-.ball-wrap {
-  font-size: 46px;
-  filter: drop-shadow(0 0 14px rgba(255,255,255,0.25));
-  animation: ballBounce 2.2s ease-in-out infinite;
+#ball-btn:hover {
+  transform: scale(1.06);
+  border-color: rgba(201,162,39,0.85);
 }
 
-#ball-btn span {
+.ball-wrap {
+  font-size: 40px;
+  animation: ballBounce 2.2s ease-in-out infinite;
+  line-height: 1;
+}
+
+.ball-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.ball-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 13px;
+  font-size: 18px;
   letter-spacing: 3px;
-  color: rgba(255,255,255,0.5);
+  color: #c9a227;
+  line-height: 1;
+}
+.ball-sub {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+}
+
+#decline-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 6px 18px;
+  color: rgba(255,255,255,0.45);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+#decline-btn:hover {
+  color: rgba(255,255,255,0.8);
+  border-color: rgba(255,255,255,0.45);
 }
 
 @keyframes ballBounce {
   0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-7px); }
+  50%       { transform: translateY(-5px); }
 }
 
 /* ── Overlay ─────────────────────────────────────────────────────── */

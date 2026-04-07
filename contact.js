@@ -1,11 +1,30 @@
-const ballBtn       = document.getElementById('ball-btn');
-const modal         = document.getElementById('contact-modal');
-const overlay       = document.getElementById('contact-overlay');
-const closeBtn      = document.getElementById('contact-close');
-const form          = document.getElementById('contact-form');
-const sendBtn       = document.getElementById('send-btn');
+const ballBtn    = document.getElementById('ball-btn');
+const declineBtn = document.getElementById('decline-btn');
+const modal      = document.getElementById('contact-modal');
+const overlay    = document.getElementById('contact-overlay');
+const closeBtn   = document.getElementById('contact-close');
+const form       = document.getElementById('contact-form');
+const sendBtn    = document.getElementById('send-btn');
+const title      = modal.querySelector('.contact-title');
+const sub        = modal.querySelector('.contact-sub');
+const toast      = document.getElementById('success-toast');
 
-function openModal() {
+let isDecline = false;
+
+function openRsvp() {
+  isDecline = false;
+  title.textContent = 'Are You Coming?';
+  sub.textContent   = 'RSVP for the match';
+  sendBtn.innerHTML = 'Kick it in! <span class="btn-ball">⚽</span>';
+  modal.classList.add('visible');
+  overlay.classList.add('visible');
+}
+
+function openDecline() {
+  isDecline = true;
+  title.textContent = "Can't Make It?";
+  sub.textContent   = "Let us know — we'll miss you";
+  sendBtn.innerHTML = 'Send Decline <span class="btn-ball">😔</span>';
   modal.classList.add('visible');
   overlay.classList.add('visible');
 }
@@ -15,7 +34,8 @@ function closeModal() {
   overlay.classList.remove('visible');
 }
 
-ballBtn.addEventListener('click', openModal);
+ballBtn.addEventListener('click', openRsvp);
+declineBtn.addEventListener('click', openDecline);
 closeBtn.addEventListener('click', closeModal);
 overlay.addEventListener('click', closeModal);
 
@@ -26,24 +46,28 @@ form.addEventListener('submit', async e => {
   const email = form.querySelector('[name="from_email"]').value.trim();
   if (!name || !email) return;
 
+  const originalBtn = sendBtn.innerHTML;
   sendBtn.textContent = 'Sending...';
   sendBtn.disabled = true;
 
   try {
     await emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', form);
   } catch (err) {
-    // Still play the animation even if emailjs isn't configured yet
     console.warn('EmailJS not configured:', err);
   }
 
   form.reset();
   closeModal();
 
-  // Trigger the 3D ball kick
-  if (typeof window.triggerBallKick === 'function') {
-    window.triggerBallKick();
+  if (isDecline) {
+    toast.textContent = "We'll miss you! Thanks for letting us know 💙";
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 3500);
+  } else {
+    // Trigger the 3D ball kick
+    if (typeof window.triggerBallKick === 'function') window.triggerBallKick();
   }
 
   sendBtn.disabled = false;
-  sendBtn.innerHTML = 'Kick it in! <span class="btn-ball">⚽</span>';
+  sendBtn.innerHTML = originalBtn;
 });
