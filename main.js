@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 // ── Renderer ──────────────────────────────────────────────────────────────────
 const canvas = document.getElementById('canvas');
@@ -66,6 +67,14 @@ floodPositions.forEach(([x, y, z]) => {
   glow.position.set(x, y + 0.3, z);
   scene.add(glow);
 });
+
+// Dedicated trophy lights
+const trophyLight1 = new THREE.PointLight(0xfff5d0, 8, 30);
+trophyLight1.position.set(0, 14, 8);
+scene.add(trophyLight1);
+const trophyLight2 = new THREE.PointLight(0xffe0a0, 5, 25);
+trophyLight2.position.set(6, 10, -6);
+scene.add(trophyLight2);
 
 // ── Pitch ─────────────────────────────────────────────────────────────────────
 function makePitchTexture() {
@@ -215,7 +224,53 @@ function makeGoal(zPos) {
 const goalFar  = makeGoal(-30); // Canada's goal (far, z=-30)
 const goalNear = makeGoal(30);  // Bosnia's goal (near, z=+30)
 
-// ── Trophy ────────────────────────────────────────────────────────────────────
+// ── Trophy (OBJ model) ────────────────────────────────────────────────────────
+// placeholder so animation loop refs are always valid
+let trophy = new THREE.Group();
+trophy.position.set(0, 0.01, 0);
+scene.add(trophy);
+const trophyMeshes = [];
+
+const trophyTex = new THREE.TextureLoader().load('tex/texture0.jpg', tex => {
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.flipY = false;
+});
+
+new OBJLoader().load(
+  'FIFA World Cup Trophy 2.obj',
+  obj => {
+    obj.traverse(child => {
+      if (child.isMesh) {
+        child.material = new THREE.MeshBasicMaterial({
+          map: trophyTex,
+        });
+        child.castShadow = true;
+        trophyMeshes.push(child);
+      }
+    });
+
+    trophy.add(obj);
+
+    // Scale and centre after adding to scene so matrices are current
+    requestAnimationFrame(() => {
+      const box = new THREE.Box3().setFromObject(obj);
+      const size = box.getSize(new THREE.Vector3());
+      const scale = 14 / size.y; // always scale by height so proportions are preserved
+      obj.scale.setScalar(scale);
+
+      requestAnimationFrame(() => {
+        const box2 = new THREE.Box3().setFromObject(obj);
+        const centre = box2.getCenter(new THREE.Vector3());
+        // Centre on XZ, sit base on ground
+        obj.position.set(-centre.x, -box2.min.y, -centre.z);
+      });
+    });
+  },
+  null,
+  err => console.error('OBJ load error:', err)
+);
+
+// ── (procedural trophy helpers kept for globe texture — no longer used) ───────
 function makeGlobeTex() {
   const W = 256, H = 128;
   const cvs = document.createElement('canvas');
@@ -314,10 +369,7 @@ function makeTrophy() {
   return group;
 }
 
-const trophy = makeTrophy();
-// Collect trophy meshes for raycasting
-const trophyMeshes = [];
-trophy.traverse(c => { if (c.isMesh) trophyMeshes.push(c); });
+// trophy + trophyMeshes defined above with OBJLoader
 
 // ── Team Flag Badges ──────────────────────────────────────────────────────────
 const texLoader = new THREE.TextureLoader();
