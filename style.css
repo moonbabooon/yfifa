@@ -3,14 +3,82 @@
 body {
   font-family: 'Inter', sans-serif;
   overflow: hidden;
-  background: #060b06;
+  background: #5baadf;
   color: #fff;
+}
+
+/* ── Sky (behind canvas) ─────────────────────────────────────────── */
+#sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  /* not visible — Three.js scene.background covers it */
+}
+
+/* ── Clouds (above canvas, below UI) ────────────────────────────── */
+#clouds {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.cloud {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.0);
+  filter: blur(0px);
+}
+
+/* Build fluffy clouds from stacked ellipses using box-shadow trick */
+.cloud::before,
+.cloud::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+}
+
+/* Cloud 1 */
+#c1 { top: 8%;  left: -5%;  width: 280px; height: 75px;
+      background: radial-gradient(ellipse at 50% 60%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.55) 50%, transparent 80%);
+      animation: drift1 55s linear infinite; }
+/* Cloud 2 */
+#c2 { top: 14%; left: 30%;  width: 220px; height: 60px;
+      background: radial-gradient(ellipse at 50% 60%, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.5) 50%, transparent 80%);
+      animation: drift1 70s linear infinite; animation-delay: -20s; }
+/* Cloud 3 */
+#c3 { top: 6%;  left: 55%;  width: 320px; height: 85px;
+      background: radial-gradient(ellipse at 50% 65%, rgba(255,255,255,0.90) 0%, rgba(255,255,255,0.52) 50%, transparent 80%);
+      animation: drift1 65s linear infinite; animation-delay: -35s; }
+/* Cloud 4 */
+#c4 { top: 20%; left: 70%;  width: 200px; height: 55px;
+      background: radial-gradient(ellipse at 50% 60%, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.45) 50%, transparent 80%);
+      animation: drift1 75s linear infinite; animation-delay: -10s; }
+/* Cloud 5 — second row, partly behind horizon */
+#c5 { top: 28%; left: 15%;  width: 260px; height: 65px;
+      background: radial-gradient(ellipse at 50% 60%, rgba(255,255,255,0.70) 0%, rgba(255,255,255,0.35) 55%, transparent 80%);
+      animation: drift1 85s linear infinite; animation-delay: -45s; }
+
+/* Sun */
+#sun {
+  position: absolute;
+  top: 7%; left: 15%;
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffde7 0%, #ffe57a 40%, rgba(255,224,59,0.25) 65%, transparent 80%);
+  filter: blur(2px);
+}
+
+@keyframes drift1 {
+  from { transform: translateX(0); }
+  to   { transform: translateX(110vw); }
 }
 
 #canvas {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 1;
 }
 
 /* ── Header ──────────────────────────────────────────────────────── */
@@ -19,7 +87,7 @@ body {
   top: 0; left: 0; right: 0;
   padding: 18px 24px;
   text-align: center;
-  z-index: 10;
+  z-index: 12;
   pointer-events: none;
 }
 

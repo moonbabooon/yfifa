@@ -11,11 +11,11 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 // ── Scene ─────────────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x060b06);
-scene.fog = new THREE.FogExp2(0x060b06, 0.011);
+scene.background = new THREE.Color(0x5baadf);
+scene.fog = new THREE.FogExp2(0x87ceeb, 0.004);
 
 // ── Camera ────────────────────────────────────────────────────────────────────
-const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 500);
+const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 900);
 camera.position.set(0, 30, 55);
 
 // ── Controls ──────────────────────────────────────────────────────────────────
@@ -29,8 +29,15 @@ controls.maxPolarAngle = Math.PI / 2.1;
 controls.autoRotate = true;
 controls.autoRotateSpeed = 0.25;
 
+
+
 // ── Lighting ──────────────────────────────────────────────────────────────────
-scene.add(new THREE.AmbientLight(0x1a2e1a, 2.2));
+scene.add(new THREE.AmbientLight(0xd0e8ff, 3.5));
+
+const sunLight = new THREE.DirectionalLight(0xfff5e0, 3.5);
+sunLight.position.set(-140, 120, -300);
+sunLight.castShadow = true;
+scene.add(sunLight);
 
 const floodPositions = [[-26, 28, -36], [26, 28, -36], [-26, 28, 36], [26, 28, 36]];
 floodPositions.forEach(([x, y, z]) => {
@@ -335,7 +342,7 @@ function makeCrowd() {
   geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
 
   return new THREE.Points(geo, new THREE.PointsMaterial({
-    size: 0.32, vertexColors: true, transparent: true, opacity: 0.55, sizeAttenuation: true,
+    size: 0.4, vertexColors: true, transparent: true, opacity: 0.75, sizeAttenuation: true,
   }));
 }
 const crowd = makeCrowd();
@@ -499,7 +506,7 @@ function animate() {
 
   // Crowd shimmer
   crowd.rotation.y = t * 0.035;
-  crowd.material.opacity = 0.5 + Math.sin(t * 3) * 0.08;
+  crowd.material.opacity = 0.65 + Math.sin(t * 3) * 0.08;
 
   // Trophy hover
   raycaster.setFromCamera(mouse, camera);
