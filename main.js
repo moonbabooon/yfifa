@@ -52,22 +52,35 @@ scene.add(trophyLight2);
 
 // ── Pitch ─────────────────────────────────────────────────────────────────────
 function makePitchTexture() {
-  const W = 512, H = 768;
+  const W = 1024, H = 1536;
   const cvs = document.createElement('canvas');
   cvs.width = W; cvs.height = H;
   const ctx = cvs.getContext('2d');
 
-  // Alternating grass stripes
-  for (let i = 0; i < 10; i++) {
-    ctx.fillStyle = i % 2 === 0 ? '#1a7c1a' : '#1e8e1e';
-    ctx.fillRect(0, i * (H / 10), W, H / 10);
+  // Richer alternating mow stripes
+  const STRIPES = 14;
+  for (let i = 0; i < STRIPES; i++) {
+    ctx.fillStyle = i % 2 === 0 ? '#1a7520' : '#22902c';
+    ctx.fillRect(0, i * (H / STRIPES), W, H / STRIPES);
   }
 
-  ctx.strokeStyle = 'rgba(255,255,255,0.88)';
-  ctx.lineWidth = 3.5;
+  // Subtle grass noise overlay
+  for (let y = 0; y < H; y += 3) {
+    for (let x = 0; x < W; x += 3) {
+      const v = (Math.random() - 0.5) * 18;
+      ctx.fillStyle = `rgba(${v > 0 ? 255 : 0},${v > 0 ? 255 : 0},0,${Math.abs(v) / 900})`;
+      ctx.fillRect(x, y, 3, 3);
+    }
+  }
 
-  const mx = 22, my = 18;
-  const fw = W - mx * 2, fh = H - my * 2; // field width/height in canvas px
+  // Crisp bright markings
+  ctx.strokeStyle = 'rgba(255,255,255,0.96)';
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  const mx = 40, my = 30;
+  const fw = W - mx * 2, fh = H - my * 2;
 
   // Boundary
   ctx.strokeRect(mx, my, fw, fh);
@@ -75,43 +88,50 @@ function makePitchTexture() {
   // Halfway line
   ctx.beginPath(); ctx.moveTo(mx, H / 2); ctx.lineTo(W - mx, H / 2); ctx.stroke();
 
-  // Center circle (radius ~9.15m / 68m * fw)
+  // Center circle
   const cr = fw * 0.135;
   ctx.beginPath(); ctx.arc(W / 2, H / 2, cr, 0, Math.PI * 2); ctx.stroke();
 
   // Center dot
   ctx.fillStyle = 'white';
-  ctx.beginPath(); ctx.arc(W / 2, H / 2, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W / 2, H / 2, 9, 0, Math.PI * 2); ctx.fill();
 
-  // Penalty boxes (40.32m wide / 68m * fw, 16.5m deep / 105m * fh)
+  // Penalty boxes
   const pbW = fw * 0.593, pbD = fh * 0.157;
   const pbX = mx + (fw - pbW) / 2;
   ctx.strokeRect(pbX, my, pbW, pbD);
   ctx.strokeRect(pbX, H - my - pbD, pbW, pbD);
 
-  // 6-yard boxes (18.32m / 68m * fw, 5.5m / 105m * fh)
+  // 6-yard boxes
   const sbW = fw * 0.269, sbD = fh * 0.052;
   const sbX = mx + (fw - sbW) / 2;
   ctx.strokeRect(sbX, my, sbW, sbD);
   ctx.strokeRect(sbX, H - my - sbD, sbW, sbD);
 
-  // Penalty spots (11m / 105m * fh from goal line)
+  // Penalty spots
   const psD = fh * 0.105;
   ctx.fillStyle = 'white';
-  ctx.beginPath(); ctx.arc(W / 2, my + psD, 5, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(W / 2, H - my - psD, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W / 2, my + psD, 8, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W / 2, H - my - psD, 8, 0, Math.PI * 2); ctx.fill();
 
   // Penalty arcs
   ctx.beginPath(); ctx.arc(W / 2, my + psD, cr, Math.PI * 0.32, Math.PI * 0.68); ctx.stroke();
   ctx.beginPath(); ctx.arc(W / 2, H - my - psD, cr, -Math.PI * 0.68, -Math.PI * 0.32); ctx.stroke();
 
   // Corner arcs
-  const co = 12;
+  const co = 20;
   [[mx, my, 0, Math.PI / 2], [W - mx, my, Math.PI / 2, Math.PI],
    [mx, H - my, -Math.PI / 2, 0], [W - mx, H - my, Math.PI, Math.PI * 1.5]
   ].forEach(([cx, cy, a0, a1]) => {
     ctx.beginPath(); ctx.arc(cx, cy, co, a0, a1); ctx.stroke();
   });
+
+  // Subtle vignette to add depth
+  const vignette = ctx.createRadialGradient(W/2, H/2, H*0.25, W/2, H/2, H*0.75);
+  vignette.addColorStop(0, 'rgba(0,0,0,0)');
+  vignette.addColorStop(1, 'rgba(0,0,0,0.22)');
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, W, H);
 
   const tex = new THREE.CanvasTexture(cvs);
   tex.colorSpace = THREE.SRGBColorSpace;
