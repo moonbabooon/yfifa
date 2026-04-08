@@ -17,7 +17,7 @@ scene.fog = new THREE.FogExp2(0x87ceeb, 0.004);
 
 // ── Camera ────────────────────────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 900);
-camera.position.set(0, 30, 55);
+camera.position.set(0, 42, 90);
 
 // ── Controls ──────────────────────────────────────────────────────────────────
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -25,7 +25,7 @@ controls.target.set(0, 2, 0);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.minDistance = 20;
-controls.maxDistance = 120;
+controls.maxDistance = 165;
 controls.maxPolarAngle = Math.PI / 2.1;
 controls.autoRotate = true;
 controls.autoRotateSpeed = 0.25;
@@ -40,33 +40,7 @@ sunLight.position.set(-140, 120, -300);
 sunLight.castShadow = true;
 scene.add(sunLight);
 
-const floodPositions = [[-26, 28, -36], [26, 28, -36], [-26, 28, 36], [26, 28, 36]];
-floodPositions.forEach(([x, y, z]) => {
-  const spot = new THREE.SpotLight(0xfff3d0, 12, 140, Math.PI / 5.5, 0.35, 1.2);
-  spot.position.set(x, y, z);
-  spot.target.position.set(0, 0, 0);
-  spot.castShadow = true;
-  spot.shadow.mapSize.set(512, 512);
-  scene.add(spot, spot.target);
-
-  const poleMat = new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.85, roughness: 0.4 });
-
-  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, y * 0.92, 6), poleMat);
-  pole.position.set(x, y * 0.46, z);
-  pole.castShadow = true;
-  scene.add(pole);
-
-  const housing = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.4, 0.9), poleMat);
-  housing.position.set(x, y, z);
-  scene.add(housing);
-
-  const glow = new THREE.Mesh(
-    new THREE.SphereGeometry(0.45, 8, 8),
-    new THREE.MeshBasicMaterial({ color: 0xfff3d0, transparent: true, opacity: 0.9 })
-  );
-  glow.position.set(x, y + 0.3, z);
-  scene.add(glow);
-});
+// Lighting handled inside makeStadium() below
 
 // Dedicated trophy lights
 const trophyLight1 = new THREE.PointLight(0xfff5d0, 8, 30);
@@ -153,14 +127,8 @@ field.rotation.x = -Math.PI / 2;
 field.receiveShadow = true;
 scene.add(field);
 
-// Dark border surround
-const border = new THREE.Mesh(
-  new THREE.PlaneGeometry(50, 70),
-  new THREE.MeshStandardMaterial({ color: 0x041004, roughness: 1 })
-);
-border.rotation.x = -Math.PI / 2;
-border.position.y = -0.01;
-scene.add(border);
+// ── Stadium ───────────────────────────────────────────────────────────────────
+// (built after goals so it renders behind them; called below)
 
 // ── Goals ─────────────────────────────────────────────────────────────────────
 function makeGoal(zPos) {
@@ -411,35 +379,214 @@ function makeFlag(flagUrl, xPos, accentColor) {
 const canadaFlag = makeFlag('https://flagcdn.com/w320/ca.png', -24, 0xff3333);
 const bosniaFlag = makeFlag('https://flagcdn.com/w320/ba.png',  24, 0x4477ff);
 
-// ── Crowd Particles ───────────────────────────────────────────────────────────
-function makeCrowd() {
-  const count = 4000;
-  const geo = new THREE.BufferGeometry();
-  const pos = new Float32Array(count * 3);
-  const col = new Float32Array(count * 3);
+// ── Stadium ───────────────────────────────────────────────────────────────────
+function makeStadium() {
+  const concreteMat = new THREE.MeshStandardMaterial({ color: 0x72727a, roughness: 0.88, metalness: 0.04 });
+  const poleMat     = new THREE.MeshStandardMaterial({ color: 0xb8bac0, metalness: 0.82, roughness: 0.22 });
+  const roofMat     = new THREE.MeshStandardMaterial({
+    color: 0xd4dae8, roughness: 0.45, metalness: 0.12,
+    transparent: true, opacity: 0.80, side: THREE.DoubleSide
+  });
+  const seatMats = [
+    new THREE.MeshStandardMaterial({ color: 0xcc1111, roughness: 0.85 }),
+    new THREE.MeshStandardMaterial({ color: 0xe8e8e8, roughness: 0.85 }),
+    new THREE.MeshStandardMaterial({ color: 0x1133cc, roughness: 0.85 }),
+    new THREE.MeshStandardMaterial({ color: 0xaa0000, roughness: 0.85 }),
+    new THREE.MeshStandardMaterial({ color: 0x002299, roughness: 0.85 }),
+  ];
 
-  for (let i = 0; i < count; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const r = 44 + Math.random() * 28;
-    pos[i * 3]     = Math.cos(angle) * r;
-    pos[i * 3 + 1] = 4 + Math.random() * 22;
-    pos[i * 3 + 2] = Math.sin(angle) * r;
+  // ── Grass apron (replaces dark border) ──────────────────────────────────
+  const apron = new THREE.Mesh(
+    new THREE.PlaneGeometry(84, 108),
+    new THREE.MeshStandardMaterial({ color: 0x1a7020, roughness: 0.95 })
+  );
+  apron.rotation.x = -Math.PI / 2;
+  apron.position.y = -0.02;
+  scene.add(apron);
 
-    const t = Math.random();
-    if (t < 0.35)      { col[i*3]=1;    col[i*3+1]=0.12; col[i*3+2]=0.12; } // red (Canada)
-    else if (t < 0.65) { col[i*3]=0.12; col[i*3+1]=0.28; col[i*3+2]=1;    } // blue (Bosnia)
-    else               { col[i*3]=1;    col[i*3+1]=1;    col[i*3+2]=1;    } // white
-  }
+  // ── Advertising hoardings at pitch edge ─────────────────────────────────
+  const adMat = new THREE.MeshStandardMaterial({ color: 0x1a3880 });
+  [-20.6, 20.6].forEach(x => {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 61), adMat);
+    b.position.set(x, 0.4, 0);
+    scene.add(b);
+  });
+  [-30.4, 30.4].forEach(z => {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(41.5, 0.8, 0.2), adMat);
+    b.position.set(0, 0.4, z);
+    scene.add(b);
+  });
 
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+  const TIERS = 5, TW = 3.0, TH = 3.2;
+  const SIDE_Z  = 68;   // full z-length of side stands  (±34)
+  const END_X   = 46;   // full x-width of end stands    (±23)
+  const CORNER  = TIERS * TW;  // total tier depth = 15
 
-  return new THREE.Points(geo, new THREE.PointsMaterial({
-    size: 0.4, vertexColors: true, transparent: true, opacity: 0.75, sizeAttenuation: true,
+  // ── Side stands (left / right of pitch) ─────────────────────────────────
+  [-1, 1].forEach(side => {
+    for (let i = 0; i < TIERS; i++) {
+      const h  = TH * (i + 1);
+      const cx = side * (21 + TW * i + TW * 0.5);
+      const tier = new THREE.Mesh(
+        new THREE.BoxGeometry(TW, h, SIDE_Z),
+        seatMats[i % seatMats.length]
+      );
+      tier.position.set(cx, h / 2, 0);
+      scene.add(tier);
+    }
+  });
+
+  // ── End stands (behind each goal) ───────────────────────────────────────
+  const TUNNEL_W = 6.0;
+  [-1, 1].forEach(end => {
+    for (let i = 0; i < TIERS; i++) {
+      const h  = TH * (i + 1);
+      const cz = end * (34 + TW * i + TW * 0.5);
+      const mat = seatMats[(i + 2) % seatMats.length];
+
+      if (i === 0) {
+        // Bottom tier split by player tunnel
+        const wing = (END_X - TUNNEL_W) / 2;
+        [-1, 1].forEach(wx => {
+          const wt = new THREE.Mesh(new THREE.BoxGeometry(wing, h, TW), mat);
+          wt.position.set(wx * (TUNNEL_W / 2 + wing / 2), h / 2, cz);
+          scene.add(wt);
+        });
+        // Tunnel lintel / ceiling slab
+        const lintel = new THREE.Mesh(new THREE.BoxGeometry(TUNNEL_W, 0.5, TW), concreteMat);
+        lintel.position.set(0, h, cz);
+        scene.add(lintel);
+      } else {
+        const tier = new THREE.Mesh(new THREE.BoxGeometry(END_X, h, TW), mat);
+        tier.position.set(0, h / 2, cz);
+        scene.add(tier);
+      }
+    }
+  });
+
+  // ── Corner blocks (fill gaps between side and end stands) ───────────────
+  [-1, 1].forEach(sx => [-1, 1].forEach(sz => {
+    for (let i = 0; i < TIERS; i++) {
+      const h  = TH * (i + 1);
+      const cx = sx * (21 + TW * i + TW * 0.5);
+      const cz = sz * (34 + TW * i + TW * 0.5);
+      const corner = new THREE.Mesh(
+        new THREE.BoxGeometry(TW, h, TW),
+        seatMats[(i + 1) % seatMats.length]
+      );
+      corner.position.set(cx, h / 2, cz);
+      scene.add(corner);
+    }
   }));
+
+  // ── Roof canopy ──────────────────────────────────────────────────────────
+  const roofY   = TIERS * TH + 3.2;
+  const roofOvr = 4.5;    // inward overhang over pitch
+  const roofThk = 0.55;
+
+  // Side roofs (span full z including corners)
+  [-1, 1].forEach(side => {
+    const outerX = side * (21 + CORNER);
+    const innerX = side * (21 - roofOvr);
+    const cxr    = (outerX + innerX) / 2;
+    const roofW  = Math.abs(outerX - innerX);
+    const r = new THREE.Mesh(
+      new THREE.BoxGeometry(roofW, roofThk, SIDE_Z + CORNER * 2),
+      roofMat
+    );
+    r.position.set(cxr, roofY, 0);
+    scene.add(r);
+    // Inner fascia strip
+    const fas = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3, 1.6, SIDE_Z + CORNER * 2),
+      concreteMat
+    );
+    fas.position.set(innerX, roofY - 0.9, 0);
+    scene.add(fas);
+  });
+
+  // End roofs (fit between side roofs)
+  [-1, 1].forEach(end => {
+    const outerZ = end * (34 + CORNER);
+    const innerZ = end * (34 - roofOvr);
+    const czr    = (outerZ + innerZ) / 2;
+    const roofD  = Math.abs(outerZ - innerZ);
+    const r = new THREE.Mesh(
+      new THREE.BoxGeometry(END_X, roofThk, roofD),
+      roofMat
+    );
+    r.position.set(0, roofY, czr);
+    scene.add(r);
+    const fas = new THREE.Mesh(
+      new THREE.BoxGeometry(END_X, 1.6, 0.3),
+      concreteMat
+    );
+    fas.position.set(0, roofY - 0.9, innerZ);
+    scene.add(fas);
+  });
+
+  // ── Light poles (4 corners — mast on stand top, boom toward pitch) ───────
+  const POLE_H    = 15;
+  const poleBaseY = TIERS * TH;
+  [[-1, -1], [-1, 1], [1, -1], [1, 1]].forEach(([sx, sz]) => {
+    const px = sx * (21 + CORNER - 1.8);
+    const pz = sz * 34;
+
+    // Vertical mast
+    const mast = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.18, 0.26, POLE_H, 8),
+      poleMat
+    );
+    mast.position.set(px, poleBaseY + POLE_H / 2, pz);
+    scene.add(mast);
+
+    // Horizontal boom pointing toward pitch center
+    const boomDir = -sx;
+    const BOOM_L  = 12;
+    const boom = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.10, 0.10, BOOM_L, 8),
+      poleMat
+    );
+    boom.rotation.z = Math.PI / 2;
+    boom.position.set(px + boomDir * BOOM_L / 2, poleBaseY + POLE_H, pz);
+    scene.add(boom);
+
+    // Diagonal brace from mid-mast to mid-boom
+    const braceLen = Math.sqrt((BOOM_L * 0.45) ** 2 + (POLE_H * 0.42) ** 2);
+    const braceAngle = Math.atan2(POLE_H * 0.42, BOOM_L * 0.45);
+    const brace = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.07, 0.07, braceLen, 6),
+      poleMat
+    );
+    brace.rotation.z = (Math.PI / 2 - braceAngle) * -sx;
+    brace.position.set(
+      px + boomDir * BOOM_L * 0.225,
+      poleBaseY + POLE_H - POLE_H * 0.21,
+      pz
+    );
+    scene.add(brace);
+
+    // Light fixtures along boom (4 units)
+    for (let k = 0; k < 4; k++) {
+      const fx = px + boomDir * (2.5 + k * 2.2);
+      const fixture = new THREE.Mesh(
+        new THREE.BoxGeometry(0.6, 0.3, 0.6),
+        new THREE.MeshStandardMaterial({ color: 0xf0f0f0, metalness: 0.7, roughness: 0.3 })
+      );
+      fixture.position.set(fx, poleBaseY + POLE_H - 0.2, pz);
+      scene.add(fixture);
+    }
+
+    // One spotlight per cluster aimed at pitch centre
+    const spot = new THREE.SpotLight(0xfff8e8, 2.5, 100, Math.PI / 5.5, 0.35);
+    spot.position.set(px + boomDir * 5, poleBaseY + POLE_H, pz);
+    spot.target.position.set(0, 0, 0);
+    scene.add(spot);
+    scene.add(spot.target);
+  });
 }
-const crowd = makeCrowd();
-scene.add(crowd);
+
+makeStadium();
 
 // ── Soccer Ball ───────────────────────────────────────────────────────────────
 function makeBallTexture() {
@@ -596,10 +743,6 @@ function animate() {
   bosniaFlag.position.y = 7 + Math.sin(t * 0.75 + Math.PI) * 0.35;
   canadaFlag.rotation.y = 0.25 + Math.sin(t * 0.3) * 0.04;
   bosniaFlag.rotation.y = -0.25 - Math.sin(t * 0.3 + 1) * 0.04;
-
-  // Crowd shimmer
-  crowd.rotation.y = t * 0.035;
-  crowd.material.opacity = 0.65 + Math.sin(t * 3) * 0.08;
 
   // Trophy hover
   raycaster.setFromCamera(mouse, camera);
