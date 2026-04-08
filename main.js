@@ -17,7 +17,7 @@ scene.fog = new THREE.FogExp2(0x87ceeb, 0.004);
 
 // ── Camera ────────────────────────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 900);
-camera.position.set(0, 42, 90);
+camera.position.set(0, 28, 70);
 
 // ── Controls ──────────────────────────────────────────────────────────────────
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -343,16 +343,7 @@ function makeTrophy() {
 function makeStadium() {
   const concreteMat = new THREE.MeshStandardMaterial({ color: 0x72727a, roughness: 0.88, metalness: 0.04 });
   const poleMat     = new THREE.MeshStandardMaterial({ color: 0xb8bac0, metalness: 0.82, roughness: 0.22 });
-  // Two close shades of stadium red — subtle depth without rainbow effect
-  const seatMats = [
-    new THREE.MeshStandardMaterial({ color: 0xb01010, roughness: 0.88 }),
-    new THREE.MeshStandardMaterial({ color: 0x8c0e0e, roughness: 0.88 }),
-    new THREE.MeshStandardMaterial({ color: 0xb01010, roughness: 0.88 }),
-    new THREE.MeshStandardMaterial({ color: 0x8c0e0e, roughness: 0.88 }),
-    new THREE.MeshStandardMaterial({ color: 0xb01010, roughness: 0.88 }),
-  ];
-
-  // ── Grass apron (replaces dark border) ──────────────────────────────────
+  // ── Grass apron ───────────────────────────────────────────────────────────
   const apron = new THREE.Mesh(
     new THREE.PlaneGeometry(84, 108),
     new THREE.MeshStandardMaterial({ color: 0x1a7020, roughness: 0.95 })
@@ -374,71 +365,10 @@ function makeStadium() {
     scene.add(b);
   });
 
-  const TIERS = 5, TW = 3.0, TH = 3.2;
-  const SIDE_Z  = 68;   // full z-length of side stands  (±34)
-  const END_X   = 46;   // full x-width of end stands    (±23)
-  const CORNER  = TIERS * TW;  // total tier depth = 15
-
-  // ── Side stands (left / right of pitch) ─────────────────────────────────
-  [-1, 1].forEach(side => {
-    for (let i = 0; i < TIERS; i++) {
-      const h  = TH * (i + 1);
-      const cx = side * (21 + TW * i + TW * 0.5);
-      const tier = new THREE.Mesh(
-        new THREE.BoxGeometry(TW, h, SIDE_Z),
-        seatMats[i % seatMats.length]
-      );
-      tier.position.set(cx, h / 2, 0);
-      scene.add(tier);
-    }
-  });
-
-  // ── End stands (behind each goal) ───────────────────────────────────────
-  const TUNNEL_W = 6.0;
-  [-1, 1].forEach(end => {
-    for (let i = 0; i < TIERS; i++) {
-      const h  = TH * (i + 1);
-      const cz = end * (34 + TW * i + TW * 0.5);
-      const mat = seatMats[(i + 2) % seatMats.length];
-
-      if (i === 0) {
-        // Bottom tier split by player tunnel
-        const wing = (END_X - TUNNEL_W) / 2;
-        [-1, 1].forEach(wx => {
-          const wt = new THREE.Mesh(new THREE.BoxGeometry(wing, h, TW), mat);
-          wt.position.set(wx * (TUNNEL_W / 2 + wing / 2), h / 2, cz);
-          scene.add(wt);
-        });
-        // Tunnel lintel / ceiling slab
-        const lintel = new THREE.Mesh(new THREE.BoxGeometry(TUNNEL_W, 0.5, TW), concreteMat);
-        lintel.position.set(0, h, cz);
-        scene.add(lintel);
-      } else {
-        const tier = new THREE.Mesh(new THREE.BoxGeometry(END_X, h, TW), mat);
-        tier.position.set(0, h / 2, cz);
-        scene.add(tier);
-      }
-    }
-  });
-
-  // ── Corner blocks (fill gaps between side and end stands) ───────────────
-  [-1, 1].forEach(sx => [-1, 1].forEach(sz => {
-    for (let i = 0; i < TIERS; i++) {
-      const h  = TH * (i + 1);
-      const cx = sx * (21 + TW * i + TW * 0.5);
-      const cz = sz * (34 + TW * i + TW * 0.5);
-      const corner = new THREE.Mesh(
-        new THREE.BoxGeometry(TW, h, TW),
-        seatMats[(i + 1) % seatMats.length]
-      );
-      corner.position.set(cx, h / 2, cz);
-      scene.add(corner);
-    }
-  }));
-
-  // ── Light poles (4 corners — mast on stand top, boom toward pitch) ───────
-  const POLE_H    = 15;
-  const poleBaseY = TIERS * TH;
+  // ── Light poles (4 corners) ───────────────────────────────────────────────
+  const POLE_H    = 22;
+  const poleBaseY = 0;
+  const CORNER    = 15;
   [[-1, -1], [-1, 1], [1, -1], [1, 1]].forEach(([sx, sz]) => {
     const px = sx * (21 + CORNER - 1.8);
     const pz = sz * 34;
