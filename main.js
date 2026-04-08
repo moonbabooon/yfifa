@@ -339,60 +339,17 @@ function makeTrophy() {
 
 // trophy + trophyMeshes defined above with OBJLoader
 
-// ── Team Flag Badges ──────────────────────────────────────────────────────────
-const texLoader = new THREE.TextureLoader();
-
-function makeFlag(flagUrl, xPos, accentColor) {
-  const group = new THREE.Group();
-
-  // Backing glow disc
-  const disc = new THREE.Mesh(
-    new THREE.CircleGeometry(3.8, 64),
-    new THREE.MeshBasicMaterial({
-      color: accentColor, transparent: true, opacity: 0.06, side: THREE.DoubleSide,
-    })
-  );
-
-  // Flag plane
-  const flagMat = new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.75 });
-  texLoader.load(flagUrl, tex => {
-    tex.colorSpace = THREE.SRGBColorSpace;
-    flagMat.map = tex;
-    flagMat.needsUpdate = true;
-  });
-  const flag = new THREE.Mesh(new THREE.PlaneGeometry(5.5, 3.5), flagMat);
-  flag.position.z = 0.05;
-
-  // Border ring
-  const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(3.2, 0.1, 8, 64),
-    new THREE.MeshBasicMaterial({ color: accentColor, transparent: true, opacity: 0.5 })
-  );
-
-  group.add(disc, flag, ring);
-  group.position.set(xPos, 7, -4);
-  group.rotation.y = xPos < 0 ? 0.25 : -0.25;
-  scene.add(group);
-  return group;
-}
-
-const canadaFlag = makeFlag('https://flagcdn.com/w320/ca.png', -24, 0xff3333);
-const bosniaFlag = makeFlag('https://flagcdn.com/w320/ba.png',  24, 0x4477ff);
-
 // ── Stadium ───────────────────────────────────────────────────────────────────
 function makeStadium() {
   const concreteMat = new THREE.MeshStandardMaterial({ color: 0x72727a, roughness: 0.88, metalness: 0.04 });
   const poleMat     = new THREE.MeshStandardMaterial({ color: 0xb8bac0, metalness: 0.82, roughness: 0.22 });
-  const roofMat     = new THREE.MeshStandardMaterial({
-    color: 0xd4dae8, roughness: 0.45, metalness: 0.12,
-    transparent: true, opacity: 0.80, side: THREE.DoubleSide
-  });
+  // Two close shades of stadium red — subtle depth without rainbow effect
   const seatMats = [
-    new THREE.MeshStandardMaterial({ color: 0xcc1111, roughness: 0.85 }),
-    new THREE.MeshStandardMaterial({ color: 0xe8e8e8, roughness: 0.85 }),
-    new THREE.MeshStandardMaterial({ color: 0x1133cc, roughness: 0.85 }),
-    new THREE.MeshStandardMaterial({ color: 0xaa0000, roughness: 0.85 }),
-    new THREE.MeshStandardMaterial({ color: 0x002299, roughness: 0.85 }),
+    new THREE.MeshStandardMaterial({ color: 0xb01010, roughness: 0.88 }),
+    new THREE.MeshStandardMaterial({ color: 0x8c0e0e, roughness: 0.88 }),
+    new THREE.MeshStandardMaterial({ color: 0xb01010, roughness: 0.88 }),
+    new THREE.MeshStandardMaterial({ color: 0x8c0e0e, roughness: 0.88 }),
+    new THREE.MeshStandardMaterial({ color: 0xb01010, roughness: 0.88 }),
   ];
 
   // ── Grass apron (replaces dark border) ──────────────────────────────────
@@ -478,52 +435,6 @@ function makeStadium() {
       scene.add(corner);
     }
   }));
-
-  // ── Roof canopy ──────────────────────────────────────────────────────────
-  const roofY   = TIERS * TH + 3.2;
-  const roofOvr = 4.5;    // inward overhang over pitch
-  const roofThk = 0.55;
-
-  // Side roofs (span full z including corners)
-  [-1, 1].forEach(side => {
-    const outerX = side * (21 + CORNER);
-    const innerX = side * (21 - roofOvr);
-    const cxr    = (outerX + innerX) / 2;
-    const roofW  = Math.abs(outerX - innerX);
-    const r = new THREE.Mesh(
-      new THREE.BoxGeometry(roofW, roofThk, SIDE_Z + CORNER * 2),
-      roofMat
-    );
-    r.position.set(cxr, roofY, 0);
-    scene.add(r);
-    // Inner fascia strip
-    const fas = new THREE.Mesh(
-      new THREE.BoxGeometry(0.3, 1.6, SIDE_Z + CORNER * 2),
-      concreteMat
-    );
-    fas.position.set(innerX, roofY - 0.9, 0);
-    scene.add(fas);
-  });
-
-  // End roofs (fit between side roofs)
-  [-1, 1].forEach(end => {
-    const outerZ = end * (34 + CORNER);
-    const innerZ = end * (34 - roofOvr);
-    const czr    = (outerZ + innerZ) / 2;
-    const roofD  = Math.abs(outerZ - innerZ);
-    const r = new THREE.Mesh(
-      new THREE.BoxGeometry(END_X, roofThk, roofD),
-      roofMat
-    );
-    r.position.set(0, roofY, czr);
-    scene.add(r);
-    const fas = new THREE.Mesh(
-      new THREE.BoxGeometry(END_X, 1.6, 0.3),
-      concreteMat
-    );
-    fas.position.set(0, roofY - 0.9, innerZ);
-    scene.add(fas);
-  });
 
   // ── Light poles (4 corners — mast on stand top, boom toward pitch) ───────
   const POLE_H    = 15;
@@ -737,12 +648,6 @@ function animate() {
       m.material.emissiveIntensity = 1;
     }
   });
-
-  // Flag badges float
-  canadaFlag.position.y = 7 + Math.sin(t * 0.75) * 0.35;
-  bosniaFlag.position.y = 7 + Math.sin(t * 0.75 + Math.PI) * 0.35;
-  canadaFlag.rotation.y = 0.25 + Math.sin(t * 0.3) * 0.04;
-  bosniaFlag.rotation.y = -0.25 - Math.sin(t * 0.3 + 1) * 0.04;
 
   // Trophy hover
   raycaster.setFromCamera(mouse, camera);
