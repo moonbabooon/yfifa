@@ -1,0 +1,323 @@
+# Patched MTL — absolute texture paths replaced with solid colours
+# Original: Blender 5.1.0 MTL File: 'Untitled.blend'
+
+newmtl *1
+Kd 0.62 0.62 0.63
+Ks 0.40 0.40 0.40
+Ni 1.500000
+d 1.000000
+illum 2
+Pm 0.4
+Pr 0.4
+
+newmtl *2
+Kd 0.62 0.62 0.63
+Ks 0.40 0.40 0.40
+Ni 1.500000
+d 1.000000
+illum 2
+Pm 0.4
+Pr 0.4
+
+newmtl *3
+Kd 0.68 0.67 0.65
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.8
+
+newmtl *6
+Kd 0.60 0.60 0.62
+Ks 0.15 0.15 0.15
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.9
+
+newmtl *7
+Kd 0.72 0.10 0.10
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.7
+
+newmtl *8
+Kd 0.60 0.60 0.62
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.8
+
+newmtl *9
+Kd 0.68 0.68 0.68
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.8
+
+newmtl *10
+Kd 0.72 0.10 0.10
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.7
+
+newmtl *11
+Kd 0.72 0.10 0.10
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.7
+
+newmtl *12
+Kd 0.74 0.74 0.74
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.8
+
+newmtl *13
+Kd 0.60 0.60 0.62
+Ks 0.15 0.15 0.15
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.9
+
+newmtl *14
+Kd 0.65 0.65 0.65
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.8
+
+newmtl *15
+Kd 0.70 0.68 0.65
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.8
+
+newmtl *17
+Kd 0.50 0.55 0.80
+Ks 0.25 0.25 0.25
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.6
+
+newmtl *18
+Kd 0.14 0.52 0.14
+Ks 0.10 0.10 0.10
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.9
+
+newmtl *20
+Kd 0.95 0.95 0.95
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl *22
+Kd 0.60 0.60 0.62
+Ks 0.15 0.15 0.15
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.9
+
+newmtl *23
+Kd 0.12 0.50 0.12
+Ks 0.08 0.08 0.08
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.95
+
+newmtl *24
+Kd 0.72 0.72 0.72
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.8
+
+newmtl *26
+Kd 0.75 0.75 0.75
+Ks 0.25 0.25 0.25
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.7
+
+newmtl *27
+Kd 0.80 0.08 0.08
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.7
+
+newmtl *28
+Kd 0.62 0.62 0.63
+Ks 0.40 0.40 0.40
+Ni 1.500000
+d 1.000000
+illum 2
+Pm 0.4
+Pr 0.4
+
+newmtl *41
+Kd 0.95 0.95 0.95
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl *45
+Kd 0.05 0.30 0.80
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl *51
+Kd 0.08 0.08 0.10
+Ks 0.30 0.30 0.30
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl *54
+Kd 0.14 0.52 0.14
+Ks 0.10 0.10 0.10
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.9
+
+newmtl <Charcoal>
+Kd 0.06 0.06 0.06
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl Google_Earth_Snapshot
+Kd 0.50 0.50 0.50
+Ks 0.15 0.15 0.15
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl Material
+Kd 0.800000 0.800000 0.800000
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl Material#1
+Kd 0.80 0.75 0.70
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl Material#2
+Kd 0.75 0.75 0.75
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl Material32
+Kd 0.55 0.55 0.55
+Ks 0.35 0.35 0.35
+Ni 1.500000
+d 1.000000
+illum 2
+Pm 0.2
+
+newmtl Screen_Shot_2022-06-16_at_4.50.59_PM
+Kd 0.80 0.80 0.80
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl [Blacktop_Old_02]
+Kd 0.22 0.22 0.22
+Ks 0.15 0.15 0.15
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl [Cladding_Siding_White]
+Kd 0.90 0.90 0.90
+Ks 0.25 0.25 0.25
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl [Color_002]
+Kd 1.000000 1.000000 1.000000
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl [Color_A02]
+Kd 0.147998 0.147998 0.147998
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl [Color_E03]
+Kd 1.000000 1.000000 0.130352
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl [Polished_Concrete_Old]
+Kd 0.78 0.78 0.78
+Ks 0.30 0.30 0.30
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.4
+
+newmtl [Translucent_Glass_Gray]
+Kd 0.50 0.55 0.60
+Ks 0.50 0.50 0.50
+Ni 1.500000
+d 0.350000
+illum 9
+
+newmtl banderin1
+Kd 0.80 0.10 0.10
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl jean_blue
+Kd 0.05 0.10 0.25
+Ks 0.20 0.20 0.20
+Ni 1.500000
+d 1.000000
+illum 2

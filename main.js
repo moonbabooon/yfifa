@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 
 // ── Renderer ──────────────────────────────────────────────────────────────────
 const canvas = document.getElementById('canvas');
@@ -38,18 +38,20 @@ controls.autoRotateSpeed = 0.25;
 
 
 // ── Lighting ──────────────────────────────────────────────────────────────────
-// Softer ambient so the GLB model's own colors/textures aren't washed out
-scene.add(new THREE.AmbientLight(0xd0e8ff, 1.2));
+scene.add(new THREE.AmbientLight(0xffffff, 2.5));
 
-const sunLight = new THREE.DirectionalLight(0xfff5e0, 2.0);
-sunLight.position.set(-140, 120, -300);
+const sunLight = new THREE.DirectionalLight(0xfff5e0, 3.0);
+sunLight.position.set(-80, 120, -200);
 sunLight.castShadow = true;
 scene.add(sunLight);
 
-// Fill light from the opposite side to reduce harsh shadows on the model
-const fillLight = new THREE.DirectionalLight(0xc8d8ff, 0.8);
-fillLight.position.set(140, 80, 300);
+const fillLight = new THREE.DirectionalLight(0xd0e4ff, 1.5);
+fillLight.position.set(80, 60, 200);
 scene.add(fillLight);
+
+const topLight = new THREE.DirectionalLight(0xffffff, 1.2);
+topLight.position.set(0, 200, 0);
+scene.add(topLight);
 
 // Dedicated trophy lights
 const trophyLight1 = new THREE.PointLight(0xfff5d0, 8, 30);
@@ -270,52 +272,49 @@ function makeTrophy() {
 
 // trophy + trophyMeshes defined above with OBJLoader
 
-// ── Stadium (field.glb) ───────────────────────────────────────────────────────
-new GLTFLoader().load(
-  'field.glb',
-  gltf => {
-    const model = gltf.scene;
+// ── Stadium (Untitled.obj + Untitled.mtl) ────────────────────────────────────
+new MTLLoader().load('Untitled.mtl', materials => {
+  materials.preload();
+  const loader = new OBJLoader();
+  loader.setMaterials(materials);
+  loader.load(
+    'Untitled.obj',
+    obj => {
+      // Auto-scale: fit longest ground dimension to ~70 units
+      const box  = new THREE.Box3().setFromObject(obj);
+      const size = box.getSize(new THREE.Vector3());
+      const scale = 70 / Math.max(size.x, size.z);
+      obj.scale.setScalar(scale);
 
-    // Auto-scale: fit longest ground dimension to ~70 units
-    const box = new THREE.Box3().setFromObject(model);
-    const size = box.getSize(new THREE.Vector3());
-    const scale = 70 / Math.max(size.x, size.z);
-    model.scale.setScalar(scale);
+      // Re-measure, centre on origin, sit base on y=0
+      const box2   = new THREE.Box3().setFromObject(obj);
+      const centre = box2.getCenter(new THREE.Vector3());
+      obj.position.set(-centre.x, -box2.min.y, -centre.z);
 
-    // Re-measure after scale, then centre on origin and sit on y=0
-    const box2  = new THREE.Box3().setFromObject(model);
-    const centre = box2.getCenter(new THREE.Vector3());
-    model.position.set(-centre.x, -box2.min.y, -centre.z);
+      obj.traverse(child => {
+        if (child.isMesh) {
+          child.castShadow    = true;
+          child.receiveShadow = true;
+          const mats = Array.isArray(child.material) ? child.material : [child.material];
+          mats.forEach(m => { m.side = THREE.DoubleSide; });
+        }
+      });
 
-    model.traverse(child => {
-      if (child.isMesh) {
-        child.castShadow    = true;
-        child.receiveShadow = true;
-        const mats = Array.isArray(child.material) ? child.material : [child.material];
-        mats.forEach(m => {
-          m.side             = THREE.DoubleSide;
-          // Tone down metalness/roughness so base colors show under direct lights
-          if (m.isMeshStandardMaterial || m.isMeshPhysicalMaterial) {
-            m.envMapIntensity = 0;
-            m.metalness       = Math.min(m.metalness, 0.3);
-          }
-        });
-      }
-    });
+      scene.add(obj);
 
-    scene.add(model);
-
-    // Centre trophy on the field surface after the model is placed
-    const fieldBox = new THREE.Box3().setFromObject(model);
-    const fieldCentre = fieldBox.getCenter(new THREE.Vector3());
-    trophy.position.x = fieldCentre.x;
-    trophy.position.z = fieldCentre.z;
-    // y stays driven by the bob animation; set base to ground level
-    trophy.position.y = 0;
-  },
-  null,
-  err => console.error('field.glb load error:', err)
-);
+      // Snap trophy to field centre
+      const fb = new THREE.Box3().setFromObject(obj);
+      const fc = fb.getCenter(new THREE.Vector3());
+      trophy.position.x = fc.x;
+      trophy.position.z = fc.z;
+      trophy.position.y = 0;
+    },
+    null,
+    err => console.error('Untitled.obj load error:', err)
+  );
+},
+null,
+err => console.error('Untitled.mtl load error:', err));
 
 // ── Soccer Ball ───────────────────────────────────────────────────────────────
 function makeBallTexture() {
