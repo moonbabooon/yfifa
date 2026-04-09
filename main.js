@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 
 // ── Renderer ──────────────────────────────────────────────────────────────────
 const canvas = document.getElementById('canvas');
@@ -14,7 +13,6 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 
-
 // ── Scene ─────────────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x5baadf);
@@ -22,15 +20,15 @@ scene.fog = new THREE.FogExp2(0x87ceeb, 0.0032);
 
 // ── Camera ────────────────────────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 900);
-camera.position.set(0, 80, 180);
+camera.position.set(0, 38, 88);
 
 // ── Controls ──────────────────────────────────────────────────────────────────
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 2, 0);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.minDistance = 40;
-controls.maxDistance = 320;
+controls.minDistance = 20;
+controls.maxDistance = 165;
 controls.maxPolarAngle = Math.PI / 2.1;
 controls.autoRotate = true;
 controls.autoRotateSpeed = 0.25;
@@ -38,20 +36,14 @@ controls.autoRotateSpeed = 0.25;
 
 
 // ── Lighting ──────────────────────────────────────────────────────────────────
-scene.add(new THREE.AmbientLight(0xffffff, 2.5));
+scene.add(new THREE.AmbientLight(0xd0e8ff, 3.5));
 
-const sunLight = new THREE.DirectionalLight(0xfff5e0, 3.0);
-sunLight.position.set(-80, 120, -200);
+const sunLight = new THREE.DirectionalLight(0xfff5e0, 3.5);
+sunLight.position.set(-140, 120, -300);
 sunLight.castShadow = true;
 scene.add(sunLight);
 
-const fillLight = new THREE.DirectionalLight(0xd0e4ff, 1.5);
-fillLight.position.set(80, 60, 200);
-scene.add(fillLight);
-
-const topLight = new THREE.DirectionalLight(0xffffff, 1.2);
-topLight.position.set(0, 200, 0);
-scene.add(topLight);
+// Lighting handled inside makeStadium() below
 
 // Dedicated trophy lights
 const trophyLight1 = new THREE.PointLight(0xfff5d0, 8, 30);
@@ -61,7 +53,105 @@ const trophyLight2 = new THREE.PointLight(0xffe0a0, 5, 25);
 trophyLight2.position.set(6, 10, -6);
 scene.add(trophyLight2);
 
-// ── Stadium model (field.glb) — loaded below after goals ─────────────────────
+// ── Pitch ─────────────────────────────────────────────────────────────────────
+function makePitchTexture() {
+  const W = 1024, H = 1536;
+  const cvs = document.createElement('canvas');
+  cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+
+  // Richer alternating mow stripes
+  const STRIPES = 14;
+  for (let i = 0; i < STRIPES; i++) {
+    ctx.fillStyle = i % 2 === 0 ? '#1a7520' : '#22902c';
+    ctx.fillRect(0, i * (H / STRIPES), W, H / STRIPES);
+  }
+
+  // Subtle grass noise overlay
+  for (let y = 0; y < H; y += 3) {
+    for (let x = 0; x < W; x += 3) {
+      const v = (Math.random() - 0.5) * 18;
+      ctx.fillStyle = `rgba(${v > 0 ? 255 : 0},${v > 0 ? 255 : 0},0,${Math.abs(v) / 900})`;
+      ctx.fillRect(x, y, 3, 3);
+    }
+  }
+
+  // Crisp bright markings
+  ctx.strokeStyle = 'rgba(255,255,255,0.96)';
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  const mx = 40, my = 30;
+  const fw = W - mx * 2, fh = H - my * 2;
+
+  // Boundary
+  ctx.strokeRect(mx, my, fw, fh);
+
+  // Halfway line
+  ctx.beginPath(); ctx.moveTo(mx, H / 2); ctx.lineTo(W - mx, H / 2); ctx.stroke();
+
+  // Center circle
+  const cr = fw * 0.135;
+  ctx.beginPath(); ctx.arc(W / 2, H / 2, cr, 0, Math.PI * 2); ctx.stroke();
+
+  // Center dot
+  ctx.fillStyle = 'white';
+  ctx.beginPath(); ctx.arc(W / 2, H / 2, 9, 0, Math.PI * 2); ctx.fill();
+
+  // Penalty boxes
+  const pbW = fw * 0.593, pbD = fh * 0.157;
+  const pbX = mx + (fw - pbW) / 2;
+  ctx.strokeRect(pbX, my, pbW, pbD);
+  ctx.strokeRect(pbX, H - my - pbD, pbW, pbD);
+
+  // 6-yard boxes
+  const sbW = fw * 0.269, sbD = fh * 0.052;
+  const sbX = mx + (fw - sbW) / 2;
+  ctx.strokeRect(sbX, my, sbW, sbD);
+  ctx.strokeRect(sbX, H - my - sbD, sbW, sbD);
+
+  // Penalty spots
+  const psD = fh * 0.105;
+  ctx.fillStyle = 'white';
+  ctx.beginPath(); ctx.arc(W / 2, my + psD, 8, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W / 2, H - my - psD, 8, 0, Math.PI * 2); ctx.fill();
+
+  // Penalty arcs
+  ctx.beginPath(); ctx.arc(W / 2, my + psD, cr, Math.PI * 0.32, Math.PI * 0.68); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W / 2, H - my - psD, cr, -Math.PI * 0.68, -Math.PI * 0.32); ctx.stroke();
+
+  // Corner arcs
+  const co = 20;
+  [[mx, my, 0, Math.PI / 2], [W - mx, my, Math.PI / 2, Math.PI],
+   [mx, H - my, -Math.PI / 2, 0], [W - mx, H - my, Math.PI, Math.PI * 1.5]
+  ].forEach(([cx, cy, a0, a1]) => {
+    ctx.beginPath(); ctx.arc(cx, cy, co, a0, a1); ctx.stroke();
+  });
+
+  // Subtle vignette to add depth
+  const vignette = ctx.createRadialGradient(W/2, H/2, H*0.25, W/2, H/2, H*0.75);
+  vignette.addColorStop(0, 'rgba(0,0,0,0)');
+  vignette.addColorStop(1, 'rgba(0,0,0,0.22)');
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, W, H);
+
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+// Field: 40 wide (x), 60 long (z)
+const field = new THREE.Mesh(
+  new THREE.PlaneGeometry(40, 60),
+  new THREE.MeshStandardMaterial({ map: makePitchTexture(), roughness: 0.88, metalness: 0 })
+);
+field.rotation.x = -Math.PI / 2;
+field.receiveShadow = true;
+scene.add(field);
+
+// ── Stadium ───────────────────────────────────────────────────────────────────
+// (built after goals so it renders behind them; called below)
 
 // ── Goals ─────────────────────────────────────────────────────────────────────
 function makeGoal(zPos) {
@@ -122,10 +212,8 @@ function makeGoal(zPos) {
   return group;
 }
 
-// Goals are created dynamically after stadium loads (to align with field)
-let goalFar, goalNear;
-// Field surface info (populated when stadium loads, used by kick/confetti)
-let fieldSurfY = 0, fieldCtrX = 0, fieldCtrZ = 0, _kickGoalDist = 55;
+const goalFar  = makeGoal(-30); // Canada's goal (far, z=-30)
+const goalNear = makeGoal(30);  // Bosnia's goal (near, z=+30)
 
 // ── Trophy (OBJ model) ────────────────────────────────────────────────────────
 // placeholder so animation loop refs are always valid
@@ -274,92 +362,194 @@ function makeTrophy() {
 
 // trophy + trophyMeshes defined above with OBJLoader
 
-// ── Stadium (Untitled.obj + Untitled.mtl) ────────────────────────────────────
-new MTLLoader().load('Untitled.mtl', materials => {
-  materials.preload();
-  const loader = new OBJLoader();
-  loader.setMaterials(materials);
-  loader.load(
-    'Untitled.obj',
-    obj => {
-      // Auto-scale: fit longest ground dimension to ~160 units
-      const box  = new THREE.Box3().setFromObject(obj);
-      const size = box.getSize(new THREE.Vector3());
-      const scale = 160 / Math.max(size.x, size.z);
-      obj.scale.setScalar(scale);
+// ── Stadium ───────────────────────────────────────────────────────────────────
+function makeStadium() {
+  const concreteMat = new THREE.MeshStandardMaterial({ color: 0x1e1e24, roughness: 0.92, metalness: 0.05 });
+  const roofMat     = new THREE.MeshStandardMaterial({ color: 0x2a2a32, roughness: 0.85, metalness: 0.18, side: THREE.DoubleSide });
+  const poleMat     = new THREE.MeshStandardMaterial({ color: 0xb0b2b8, metalness: 0.82, roughness: 0.22 });
+  const seatMat     = new THREE.MeshStandardMaterial({ color: 0x7a1010, roughness: 0.92, metalness: 0 });
+  const seatMat2    = new THREE.MeshStandardMaterial({ color: 0x8c1515, roughness: 0.92, metalness: 0 }); // alternating lighter row
 
-      // Re-measure, centre on origin, sit base on y=0
-      const box2   = new THREE.Box3().setFromObject(obj);
-      const centre = box2.getCenter(new THREE.Vector3());
-      obj.position.set(-centre.x, -box2.min.y, -centre.z);
-
-      obj.traverse(child => {
-        if (child.isMesh) {
-          child.castShadow    = true;
-          child.receiveShadow = true;
-          const mats = Array.isArray(child.material) ? child.material : [child.material];
-          mats.forEach(m => { m.side = THREE.DoubleSide; });
-        }
-      });
-
-      scene.add(obj);
-
-      // ── Detect actual grass/pitch surface ─────────────────────────
-      let grassBox = null;
-      const grassMtls = new Set(['*18', '*23', '*54']);
-      obj.traverse(child => {
-        if (!child.isMesh) return;
-        const mats = Array.isArray(child.material) ? child.material : [child.material];
-        if (mats.some(m => grassMtls.has(m.name))) {
-          const mb = new THREE.Box3().setFromObject(child);
-          grassBox = grassBox ? grassBox.union(mb) : mb;
-        }
-      });
-
-      const fb = new THREE.Box3().setFromObject(obj);
-      let fCX = 0, fCZ = 0, fY = 0, goalDist = 0;
-
-      if (grassBox) {
-        const gc = grassBox.getCenter(new THREE.Vector3());
-        const gs = grassBox.getSize(new THREE.Vector3());
-        fCX = gc.x; fCZ = gc.z; fY = grassBox.max.y;
-        // Longer axis = field direction; place goals 88% of half-length in
-        goalDist = Math.max(gs.x, gs.z) / 2 * 0.88;
-      } else {
-        // Fallback: use bounding box
-        fY = 0;
-        const halfZ = (fb.max.z - fb.min.z) / 2;
-        goalDist = halfZ * 0.72;
-      }
-
-      // Store globally for kick/confetti
-      fieldSurfY = fY; fieldCtrX = fCX; fieldCtrZ = fCZ; _kickGoalDist = goalDist;
-
-      // Create goals, then move them onto the actual field surface
-      goalFar  = makeGoal(-goalDist);
-      goalNear = makeGoal( goalDist);
-      goalFar.position.set(fCX, fY, fCZ - goalDist);
-      goalNear.position.set(fCX, fY, fCZ + goalDist);
-
-      // Trophy on pitch centre
-      trophy.position.set(fCX, fY + 0.01, fCZ);
-
-      // Update kick trajectory
-      kickStart.set(fCX,     fY + 0.9, fCZ + goalDist * 0.28);
-      kickEnd.set(  fCX - 2, fY + 0.5, fCZ - goalDist + 0.5);
-      kickCtrl.set( fCX - 1, fY + goalDist * 0.40, fCZ);
-
-      // Re-aim camera at actual field centre
-      controls.target.set(fCX, fY, fCZ);
-      camera.position.set(fCX, fY + 85, fCZ + 155);
-      controls.update();
-    },
-    null,
-    err => console.error('Untitled.obj load error:', err)
+  // ── Grass apron ───────────────────────────────────────────────────────────
+  const apron = new THREE.Mesh(
+    new THREE.PlaneGeometry(110, 130),
+    new THREE.MeshStandardMaterial({ color: 0x185e18, roughness: 0.96 })
   );
-},
-null,
-err => console.error('Untitled.mtl load error:', err));
+  apron.rotation.x = -Math.PI / 2;
+  apron.position.y = -0.02;
+  scene.add(apron);
+
+  // ── Advertising hoardings ─────────────────────────────────────────────────
+  const adMat = new THREE.MeshStandardMaterial({ color: 0x1a3880 });
+  [-20.6, 20.6].forEach(x => {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 61), adMat);
+    b.position.set(x, 0.4, 0); scene.add(b);
+  });
+  [-30.4, 30.4].forEach(z => {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(41.5, 0.8, 0.2), adMat);
+    b.position.set(0, 0.4, z); scene.add(b);
+  });
+
+  // ── Stand builder ─────────────────────────────────────────────────────────
+  // axis='x' → long sides (left/right), axis='z' → end stands (north/south)
+  // sign = -1 or +1 for each side
+  const ROW_D     = 1.8;  // row depth (perpendicular to pitch)
+  const ROW_RISE  = 1.6;  // vertical rise per row
+  const ROW_THICK = 0.55; // platform thickness
+
+  function addStand(axis, sign, startOff, standLen, rows) {
+    for (let i = 0; i < rows; i++) {
+      const off  = startOff + (i + 0.5) * ROW_D;
+      const yPos = i * ROW_RISE + ROW_THICK / 2;
+      const mat  = i % 2 === 0 ? seatMat : seatMat2;
+
+      const mesh = new THREE.Mesh(
+        axis === 'x'
+          ? new THREE.BoxGeometry(ROW_D, ROW_THICK, standLen)
+          : new THREE.BoxGeometry(standLen, ROW_THICK, ROW_D),
+        mat
+      );
+      mesh.position.set(
+        axis === 'x' ? sign * off : 0,
+        yPos,
+        axis === 'x' ? 0 : sign * off
+      );
+      mesh.receiveShadow = true;
+      scene.add(mesh);
+    }
+
+    // Front concrete fascia (small kickboard at pitch edge)
+    const fasciaH = 1.2;
+    const fascia  = new THREE.Mesh(
+      axis === 'x'
+        ? new THREE.BoxGeometry(0.4, fasciaH, standLen)
+        : new THREE.BoxGeometry(standLen, fasciaH, 0.4),
+      concreteMat
+    );
+    fascia.position.set(
+      axis === 'x' ? sign * (startOff + 0.2) : 0,
+      fasciaH / 2,
+      axis === 'x' ? 0 : sign * (startOff + 0.2)
+    );
+    scene.add(fascia);
+
+    // Back wall
+    const backOff  = startOff + rows * ROW_D;
+    const totalH   = rows * ROW_RISE;
+    const backWall = new THREE.Mesh(
+      axis === 'x'
+        ? new THREE.BoxGeometry(1.4, totalH, standLen)
+        : new THREE.BoxGeometry(standLen, totalH, 1.4),
+      concreteMat
+    );
+    backWall.position.set(
+      axis === 'x' ? sign * (backOff + 0.7) : 0,
+      totalH / 2,
+      axis === 'x' ? 0 : sign * (backOff + 0.7)
+    );
+    scene.add(backWall);
+
+    // Roof canopy (overhangs 55% of stand depth toward pitch)
+    const roofDepth  = rows * ROW_D * 0.55;
+    const roofCenter = backOff - roofDepth / 2;
+    const roof = new THREE.Mesh(
+      axis === 'x'
+        ? new THREE.BoxGeometry(roofDepth, 0.9, standLen + 1)
+        : new THREE.BoxGeometry(standLen + 1, 0.9, roofDepth),
+      roofMat
+    );
+    roof.position.set(
+      axis === 'x' ? sign * roofCenter : 0,
+      totalH + 2.2,
+      axis === 'x' ? 0 : sign * roofCenter
+    );
+    scene.add(roof);
+
+    // Roof support columns (one per ~15 units of stand length)
+    const colCount = Math.floor(standLen / 16);
+    for (let c = 0; c <= colCount; c++) {
+      const colPos = -standLen / 2 + (c / colCount) * standLen;
+      const col = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.18, 0.22, totalH + 2.2, 8),
+        concreteMat
+      );
+      col.position.set(
+        axis === 'x' ? sign * (backOff + 0.7) : colPos,
+        (totalH + 2.2) / 2,
+        axis === 'x' ? colPos : sign * (backOff + 0.7)
+      );
+      scene.add(col);
+    }
+  }
+
+  // Long sides — 12 rows each, length 80
+  addStand('x', -1, 21.5, 80, 12);
+  addStand('x',  1, 21.5, 80, 12);
+
+  // End stands — 9 rows each, length 46
+  addStand('z', -1, 30.5, 46, 9);
+  addStand('z',  1, 30.5, 46, 9);
+
+  // ── Corner concrete blocks ────────────────────────────────────────────────
+  const LONG_BACK = 21.5 + 12 * ROW_D; // ~43.1
+  const END_BACK  = 30.5 + 9  * ROW_D; // ~46.7
+  const LONG_H    = 12 * ROW_RISE;
+  const END_H     = 9  * ROW_RISE;
+  [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([sx,sz]) => {
+    const cw = LONG_BACK - 21.5; // corner width matches stand depth
+    const cd = END_BACK  - 30.5;
+    const ch = Math.min(LONG_H, END_H) * 0.85;
+    const corner = new THREE.Mesh(new THREE.BoxGeometry(cw, ch, cd), concreteMat);
+    corner.position.set(sx * (21.5 + cw / 2), ch / 2, sz * (30.5 + cd / 2));
+    scene.add(corner);
+  });
+
+  // ── Floodlight masts (behind back walls, 4 corners) ───────────────────────
+  const POLE_H = 32;
+  [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([sx,sz]) => {
+    const px = sx * (LONG_BACK + 5);
+    const pz = sz * (END_BACK  + 4);
+
+    // Mast
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, POLE_H, 8), poleMat);
+    mast.position.set(px, POLE_H / 2, pz);
+    scene.add(mast);
+
+    // Boom toward pitch
+    const BOOM_L = 12;
+    const boom = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, BOOM_L, 8), poleMat);
+    boom.rotation.z = Math.PI / 2;
+    boom.position.set(px - sx * BOOM_L / 2, POLE_H, pz);
+    scene.add(boom);
+
+    // Diagonal brace
+    const braceLen   = Math.hypot(BOOM_L * 0.5, POLE_H * 0.38);
+    const braceAngle = Math.atan2(POLE_H * 0.38, BOOM_L * 0.5);
+    const brace = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, braceLen, 6), poleMat);
+    brace.rotation.z = (Math.PI / 2 - braceAngle) * -sx;
+    brace.position.set(px - sx * BOOM_L * 0.25, POLE_H - POLE_H * 0.19, pz);
+    scene.add(brace);
+
+    // Light fixtures
+    for (let k = 0; k < 5; k++) {
+      const fix = new THREE.Mesh(
+        new THREE.BoxGeometry(0.7, 0.35, 0.7),
+        new THREE.MeshStandardMaterial({ color: 0xf0f0f0, metalness: 0.7, roughness: 0.3 })
+      );
+      fix.position.set(px - sx * (2 + k * 2), POLE_H - 0.2, pz);
+      scene.add(fix);
+    }
+
+    // Spotlight aimed at pitch
+    const spot = new THREE.SpotLight(0xfff8e8, 3, 160, Math.PI / 5, 0.4);
+    spot.position.set(px - sx * 6, POLE_H, pz);
+    spot.target.position.set(0, 0, 0);
+    scene.add(spot);
+    scene.add(spot.target);
+  });
+}
+
+makeStadium();
 
 // ── Soccer Ball ───────────────────────────────────────────────────────────────
 function makeBallTexture() {
@@ -470,9 +660,9 @@ panelClose.addEventListener('click', () => {
 // ── Ball Kick State ───────────────────────────────────────────────────────────
 let kickActive = false;
 let kickT = 0;
-let kickStart = new THREE.Vector3(0, 0.9, 16);
-let kickEnd   = new THREE.Vector3(-2, 0.5, -55);  // updated when stadium loads
-let kickCtrl  = new THREE.Vector3(-1, 22, 0);     // Bezier control point
+const kickStart = new THREE.Vector3(0, 0.9, 8);
+const kickEnd   = new THREE.Vector3(-2, 0.5, -29.5); // far goal corner
+const kickCtrl  = new THREE.Vector3(-1, 11, -10);    // Bezier control point
 
 // Exposed for contact.js
 window.triggerBallKick = function () {
@@ -533,7 +723,7 @@ function animate() {
     if (prog >= 1) {
       kickActive = false;
       ball.visible = false;
-      burstConfetti(new THREE.Vector3(fieldCtrX - 2, fieldSurfY + 3, fieldCtrZ - _kickGoalDist + 0.5));
+      burstConfetti(new THREE.Vector3(-2, 3, -29));
       netShaking = true;
       netShakeT = 0;
       const toast = document.getElementById('success-toast');
@@ -544,7 +734,7 @@ function animate() {
   }
 
   // Net shake on far goal
-  if (netShaking && goalFar) {
+  if (netShaking) {
     netShakeT += 0.05;
     const shake = Math.sin(netShakeT * 18) * Math.exp(-netShakeT * 3);
     goalFar.scale.set(1, 1 + shake * 0.06, 1 + shake * 0.12);
