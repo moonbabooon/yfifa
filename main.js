@@ -10,6 +10,10 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
 
 // ── Scene ─────────────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -34,14 +38,18 @@ controls.autoRotateSpeed = 0.25;
 
 
 // ── Lighting ──────────────────────────────────────────────────────────────────
-scene.add(new THREE.AmbientLight(0xd0e8ff, 3.5));
+// Softer ambient so the GLB model's own colors/textures aren't washed out
+scene.add(new THREE.AmbientLight(0xd0e8ff, 1.2));
 
-const sunLight = new THREE.DirectionalLight(0xfff5e0, 3.5);
+const sunLight = new THREE.DirectionalLight(0xfff5e0, 2.0);
 sunLight.position.set(-140, 120, -300);
 sunLight.castShadow = true;
 scene.add(sunLight);
 
-// Lighting handled inside makeStadium() below
+// Fill light from the opposite side to reduce harsh shadows on the model
+const fillLight = new THREE.DirectionalLight(0xc8d8ff, 0.8);
+fillLight.position.set(140, 80, 300);
+scene.add(fillLight);
 
 // Dedicated trophy lights
 const trophyLight1 = new THREE.PointLight(0xfff5d0, 8, 30);
@@ -283,6 +291,15 @@ new GLTFLoader().load(
       if (child.isMesh) {
         child.castShadow    = true;
         child.receiveShadow = true;
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.forEach(m => {
+          m.side             = THREE.DoubleSide;
+          // Tone down metalness/roughness so base colors show under direct lights
+          if (m.isMeshStandardMaterial || m.isMeshPhysicalMaterial) {
+            m.envMapIntensity = 0;
+            m.metalness       = Math.min(m.metalness, 0.3);
+          }
+        });
       }
     });
 
