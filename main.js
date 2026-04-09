@@ -124,6 +124,8 @@ function makeGoal(zPos) {
 
 // Goals are created dynamically after stadium loads (to align with field)
 let goalFar, goalNear;
+// Field surface info (populated when stadium loads, used by kick/confetti)
+let fieldSurfY = 0, fieldCtrX = 0, fieldCtrZ = 0, _kickGoalDist = 55;
 
 // ── Trophy (OBJ model) ────────────────────────────────────────────────────────
 // placeholder so animation loop refs are always valid
@@ -302,20 +304,55 @@ new MTLLoader().load('Untitled.mtl', materials => {
 
       scene.add(obj);
 
-      // Place goals at field ends (inside the grass area ~78% of half-depth)
+      // ── Detect actual grass/pitch surface ─────────────────────────
+      let grassBox = null;
+      const grassMtls = new Set(['*18', '*23', '*54']);
+      obj.traverse(child => {
+        if (!child.isMesh) return;
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        if (mats.some(m => grassMtls.has(m.name))) {
+          const mb = new THREE.Box3().setFromObject(child);
+          grassBox = grassBox ? grassBox.union(mb) : mb;
+        }
+      });
+
       const fb = new THREE.Box3().setFromObject(obj);
-      const halfZ = (fb.max.z - fb.min.z) / 2;
-      const goalZ = halfZ * 0.72;
-      goalFar  = makeGoal(-goalZ);
-      goalNear = makeGoal( goalZ);
+      let fCX = 0, fCZ = 0, fY = 0, goalDist = 0;
 
-      // Update kick trajectory to match field size
-      kickStart.set(0, 0.9,  goalZ * 0.28);
-      kickEnd.set(  -2, 0.5, -goalZ + 0.5);
-      kickCtrl.set( -1, goalZ * 0.38, 0);
+      if (grassBox) {
+        const gc = grassBox.getCenter(new THREE.Vector3());
+        const gs = grassBox.getSize(new THREE.Vector3());
+        fCX = gc.x; fCZ = gc.z; fY = grassBox.max.y;
+        // Longer axis = field direction; place goals 88% of half-length in
+        goalDist = Math.max(gs.x, gs.z) / 2 * 0.88;
+      } else {
+        // Fallback: use bounding box
+        fY = 0;
+        const halfZ = (fb.max.z - fb.min.z) / 2;
+        goalDist = halfZ * 0.72;
+      }
 
-      // Snap trophy to field centre (XZ), just above ground
-      trophy.position.set(0, 0.01, 0);
+      // Store globally for kick/confetti
+      fieldSurfY = fY; fieldCtrX = fCX; fieldCtrZ = fCZ; _kickGoalDist = goalDist;
+
+      // Create goals, then move them onto the actual field surface
+      goalFar  = makeGoal(-goalDist);
+      goalNear = makeGoal( goalDist);
+      goalFar.position.set(fCX, fY, fCZ - goalDist);
+      goalNear.position.set(fCX, fY, fCZ + goalDist);
+
+      // Trophy on pitch centre
+      trophy.position.set(fCX, fY + 0.01, fCZ);
+
+      // Update kick trajectory
+      kickStart.set(fCX,     fY + 0.9, fCZ + goalDist * 0.28);
+      kickEnd.set(  fCX - 2, fY + 0.5, fCZ - goalDist + 0.5);
+      kickCtrl.set( fCX - 1, fY + goalDist * 0.40, fCZ);
+
+      // Re-aim camera at actual field centre
+      controls.target.set(fCX, fY, fCZ);
+      camera.position.set(fCX, fY + 85, fCZ + 155);
+      controls.update();
     },
     null,
     err => console.error('Untitled.obj load error:', err)
@@ -496,7 +533,7 @@ function animate() {
     if (prog >= 1) {
       kickActive = false;
       ball.visible = false;
-      burstConfetti(new THREE.Vector3(-2, 3, -29));
+      burstConfetti(new THREE.Vector3(fieldCtrX - 2, fieldSurfY + 3, fieldCtrZ - _kickGoalDist + 0.5));
       netShaking = true;
       netShakeT = 0;
       const toast = document.getElementById('success-toast');
