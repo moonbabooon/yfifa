@@ -22,15 +22,15 @@ scene.fog = new THREE.FogExp2(0x87ceeb, 0.0032);
 
 // ── Camera ────────────────────────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 900);
-camera.position.set(0, 45, 100);
+camera.position.set(0, 80, 180);
 
 // ── Controls ──────────────────────────────────────────────────────────────────
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 2, 0);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.minDistance = 20;
-controls.maxDistance = 165;
+controls.minDistance = 40;
+controls.maxDistance = 320;
 controls.maxPolarAngle = Math.PI / 2.1;
 controls.autoRotate = true;
 controls.autoRotateSpeed = 0.25;
@@ -122,8 +122,8 @@ function makeGoal(zPos) {
   return group;
 }
 
-const goalFar  = makeGoal(-30); // Canada's goal (far, z=-30)
-const goalNear = makeGoal(30);  // Bosnia's goal (near, z=+30)
+// Goals are created dynamically after stadium loads (to align with field)
+let goalFar, goalNear;
 
 // ── Trophy (OBJ model) ────────────────────────────────────────────────────────
 // placeholder so animation loop refs are always valid
@@ -280,10 +280,10 @@ new MTLLoader().load('Untitled.mtl', materials => {
   loader.load(
     'Untitled.obj',
     obj => {
-      // Auto-scale: fit longest ground dimension to ~70 units
+      // Auto-scale: fit longest ground dimension to ~160 units
       const box  = new THREE.Box3().setFromObject(obj);
       const size = box.getSize(new THREE.Vector3());
-      const scale = 70 / Math.max(size.x, size.z);
+      const scale = 160 / Math.max(size.x, size.z);
       obj.scale.setScalar(scale);
 
       // Re-measure, centre on origin, sit base on y=0
@@ -302,12 +302,20 @@ new MTLLoader().load('Untitled.mtl', materials => {
 
       scene.add(obj);
 
-      // Snap trophy to field centre
+      // Place goals at field ends (inside the grass area ~78% of half-depth)
       const fb = new THREE.Box3().setFromObject(obj);
-      const fc = fb.getCenter(new THREE.Vector3());
-      trophy.position.x = fc.x;
-      trophy.position.z = fc.z;
-      trophy.position.y = 0;
+      const halfZ = (fb.max.z - fb.min.z) / 2;
+      const goalZ = halfZ * 0.72;
+      goalFar  = makeGoal(-goalZ);
+      goalNear = makeGoal( goalZ);
+
+      // Update kick trajectory to match field size
+      kickStart.set(0, 0.9,  goalZ * 0.28);
+      kickEnd.set(  -2, 0.5, -goalZ + 0.5);
+      kickCtrl.set( -1, goalZ * 0.38, 0);
+
+      // Snap trophy to field centre (XZ), just above ground
+      trophy.position.set(0, 0.01, 0);
     },
     null,
     err => console.error('Untitled.obj load error:', err)
@@ -425,9 +433,9 @@ panelClose.addEventListener('click', () => {
 // ── Ball Kick State ───────────────────────────────────────────────────────────
 let kickActive = false;
 let kickT = 0;
-const kickStart = new THREE.Vector3(0, 0.9, 8);
-const kickEnd   = new THREE.Vector3(-2, 0.5, -29.5); // far goal corner
-const kickCtrl  = new THREE.Vector3(-1, 11, -10);    // Bezier control point
+let kickStart = new THREE.Vector3(0, 0.9, 16);
+let kickEnd   = new THREE.Vector3(-2, 0.5, -55);  // updated when stadium loads
+let kickCtrl  = new THREE.Vector3(-1, 22, 0);     // Bezier control point
 
 // Exposed for contact.js
 window.triggerBallKick = function () {
@@ -499,7 +507,7 @@ function animate() {
   }
 
   // Net shake on far goal
-  if (netShaking) {
+  if (netShaking && goalFar) {
     netShakeT += 0.05;
     const shake = Math.sin(netShakeT * 18) * Math.exp(-netShakeT * 3);
     goalFar.scale.set(1, 1 + shake * 0.06, 1 + shake * 0.12);
