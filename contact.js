@@ -55,9 +55,15 @@ form.addEventListener('submit', async e => {
   sendBtn.disabled = true;
 
   try {
-    await emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', form);
+    const data = new FormData(form);
+    data.append('rsvp_type', isDecline ? 'decline' : 'accept');
+    await fetch('https://formspree.io/f/xzdkqylq', {
+      method: 'POST',
+      body: data,
+      headers: { 'Accept': 'application/json' }
+    });
   } catch (err) {
-    console.warn('EmailJS not configured:', err);
+    console.warn('Formspree error:', err);
   }
 
   form.reset();
