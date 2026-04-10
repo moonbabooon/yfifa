@@ -410,6 +410,21 @@ function makeStadium() {
     b.position.set(0, 0.4, z); scene.add(b);
   });
 
+  // ── Corner flags ──────────────────────────────────────────────────────────
+  const flagPoleMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.5, roughness: 0.3 });
+  const flagMat     = new THREE.MeshStandardMaterial({ color: 0xc8102e, side: THREE.DoubleSide });
+
+  [[-20, -30], [20, -30], [-20, 30], [20, 30]].forEach(([fx, fz]) => {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 6), flagPoleMat);
+    pole.position.set(fx, 0.75, fz);
+    scene.add(pole);
+
+    const flag = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.32), flagMat);
+    flag.position.set(fx + 0.26, 1.4, fz);
+    flag.rotation.y = Math.PI / 2;
+    scene.add(flag);
+  });
+
   function makeHoardingTexture(canvasW) {
     const H = 64;
     const cvs = document.createElement('canvas');
