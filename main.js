@@ -382,12 +382,25 @@ function makeStadium() {
     new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.9, metalness: 0 }),
   ];
 
-  seatMat.map  = makeCrowdTexture(0xc8102e);
-  seatMat2.map = makeCrowdTexture(0x1a3880);
-  seatMat3.map = makeCrowdTexture(0xd8d8d8);
+  // End stands / corners: axis='z', BoxGeometry(standLen, ROW_THICK, ROW_D)
+  //   top-face U maps along X (standLen) → wrapS repeat.x
+  seatMat.map  = (() => { const t = makeCrowdTexture(0xc8102e); t.wrapS = THREE.RepeatWrapping; t.repeat.x = 4; return t; })();
+  seatMat2.map = (() => { const t = makeCrowdTexture(0x1a3880); t.wrapS = THREE.RepeatWrapping; t.repeat.x = 4; return t; })();
+  seatMat3.map = (() => { const t = makeCrowdTexture(0xd8d8d8); t.wrapS = THREE.RepeatWrapping; t.repeat.x = 4; return t; })();
   seatMat.needsUpdate  = true;
   seatMat2.needsUpdate = true;
   seatMat3.needsUpdate = true;
+
+  // Long sides: axis='x', BoxGeometry(ROW_D, ROW_THICK, standLen=80)
+  //   top-face U maps along X (ROW_D=1.8, narrow!) → must tile on V instead
+  const seatMatX  = new THREE.MeshStandardMaterial({ color: 0xc8102e, roughness: 0.92, metalness: 0 });
+  const seatMat2X = new THREE.MeshStandardMaterial({ color: 0x1a3880, roughness: 0.92, metalness: 0 });
+  const seatMat3X = new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.92, metalness: 0 });
+  seatMatX.map  = (() => { const t = makeCrowdTexture(0xc8102e); t.wrapT = THREE.RepeatWrapping; t.repeat.y = 10; return t; })();
+  seatMat2X.map = (() => { const t = makeCrowdTexture(0x1a3880); t.wrapT = THREE.RepeatWrapping; t.repeat.y = 10; return t; })();
+  seatMat3X.map = (() => { const t = makeCrowdTexture(0xd8d8d8); t.wrapT = THREE.RepeatWrapping; t.repeat.y = 10; return t; })();
+  seatMatX.needsUpdate = seatMat2X.needsUpdate = seatMat3X.needsUpdate = true;
+  const seatMatsX = [seatMatX, seatMat2X, seatMat3X];
 
   // ── Grass apron ───────────────────────────────────────────────────────────
   const apron = new THREE.Mesh(
@@ -502,15 +515,15 @@ function makeStadium() {
     ctx.fillStyle = `rgb(${r},${g},${b})`;
     ctx.fillRect(0, 0, W, H);
 
-    const shirts = ['#4a6040','#2a6060','#1e2a50','#363636','#9a8030','#6a1830','#5a3a20'];
+    const shirts = ['#ffffff','#ffee22','#ff6600','#00cc44','#22aacc','#ff2266','#aaaaff','#888888'];
     const skins  = ['#f5c8a0','#e8b080','#c88050','#a06030','#7a4420'];
-    const cols = 88, dotRows = 4;
+    const cols = 64, dotRows = 4;
 
     for (let row = 0; row < dotRows; row++) {
       for (let col = 0; col < cols; col++) {
         const x  = (col + 0.5) * (W / cols) + (Math.random() - 0.5) * 2;
         const y  = (row + 0.5) * (H / dotRows) + (Math.random() - 0.5) * 3;
-        const dr = 3.5;
+        const dr = 5;
         ctx.beginPath();
         ctx.arc(x, y + dr * 1.1, dr * 1.3, 0, Math.PI * 2);
         ctx.fillStyle = shirts[Math.floor(Math.random() * shirts.length)];
@@ -528,8 +541,6 @@ function makeStadium() {
 
     const tex = new THREE.CanvasTexture(cvs);
     tex.colorSpace = THREE.SRGBColorSpace;
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.repeat.x = 4;
     return tex;
   }
 
@@ -588,7 +599,7 @@ function makeStadium() {
     for (let i = 0; i < rows; i++) {
       const off  = startOff + (i + 0.5) * ROW_D;
       const yPos = i * ROW_RISE + ROW_THICK / 2;
-      const mat  = seatMats[i % 3];
+      const mat  = (axis === 'x' ? seatMatsX : seatMats)[i % 3];
 
       const mesh = new THREE.Mesh(
         axis === 'x'
