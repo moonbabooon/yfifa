@@ -850,3 +850,7 @@ document.getElementById('predict-overlay').addEventListener('click', () => close
     }, 3500);
   });
 }());
+
+// ── Match Programme ───────────────────────────────────────────────────────────
+document.getElementById('programme-overlay').addEventListener('click', () => closeModal('programme-overlay', 'programme-modal'));
+document.getElementById('programme-btn').addEventListener('click', () => openModal('programme-overlay', 'programme-modal'));
