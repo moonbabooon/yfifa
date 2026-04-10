@@ -493,6 +493,43 @@ function makeStadium() {
     );
     scene.add(backWall);
 
+    // Exterior arcade facade — columns + lintels outside back wall
+    const arcadeColCount = Math.floor(standLen / 8);
+    const arcadeTotalH   = rows * ROW_RISE;
+    const arcadeBackX    = backOff + 1.6; // just outside back wall
+
+    for (let c = 0; c <= arcadeColCount; c++) {
+      const colPos = -standLen / 2 + (c / arcadeColCount) * standLen;
+
+      const pillar = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.3, 0.35, arcadeTotalH, 8),
+        concreteMat
+      );
+      pillar.position.set(
+        axis === 'x' ? sign * arcadeBackX : colPos,
+        arcadeTotalH / 2,
+        axis === 'x' ? colPos : sign * arcadeBackX
+      );
+      scene.add(pillar);
+
+      if (c < arcadeColCount) {
+        const lintelSpan = standLen / arcadeColCount;
+        const lintelMid  = -standLen / 2 + (c + 0.5) / arcadeColCount * standLen;
+        const lintel = new THREE.Mesh(
+          axis === 'x'
+            ? new THREE.BoxGeometry(0.5, 1.0, lintelSpan)
+            : new THREE.BoxGeometry(lintelSpan, 1.0, 0.5),
+          concreteMat
+        );
+        lintel.position.set(
+          axis === 'x' ? sign * arcadeBackX : lintelMid,
+          arcadeTotalH * 0.70,
+          axis === 'x' ? lintelMid : sign * arcadeBackX
+        );
+        scene.add(lintel);
+      }
+    }
+
     // Roof canopy (overhangs 55% of stand depth toward pitch)
     const roofDepth  = rows * ROW_D * 0.55;
     const roofCenter = backOff - roofDepth / 2;
