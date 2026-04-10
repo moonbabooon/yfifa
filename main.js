@@ -431,7 +431,7 @@ function makeStadium() {
 
   // Long sides (east & west)
   [-1, 1].forEach(sx => {
-    const strip = new THREE.Mesh(new THREE.PlaneGeometry(TRACK_W, 69), trackMat);
+    const strip = new THREE.Mesh(new THREE.PlaneGeometry(TRACK_W, 60), trackMat);
     strip.rotation.x = -Math.PI / 2;
     strip.position.set(sx * (20 + TRACK_W / 2), 0.005, 0);
     scene.add(strip);
@@ -584,6 +584,7 @@ function makeStadium() {
   const ROW_THICK = 0.55; // platform thickness
 
   function addStand(axis, sign, startOff, standLen, rows) {
+    const backOff = startOff + rows * ROW_D;
     for (let i = 0; i < rows; i++) {
       const off  = startOff + (i + 0.5) * ROW_D;
       const yPos = i * ROW_RISE + ROW_THICK / 2;
@@ -627,7 +628,6 @@ function makeStadium() {
           : new THREE.BoxGeometry(standLen, ROW_RISE * 0.65, 0.06),
         fasciaStripMats[i % 3]
       );
-      const backOff = startOff + rows * ROW_D;
       fasciaStrip.position.set(
         axis === 'x' ? sign * backOff : 0,
         i * ROW_RISE + ROW_RISE / 2,
@@ -652,7 +652,6 @@ function makeStadium() {
     scene.add(fascia);
 
     // Back wall
-    const backOff  = startOff + rows * ROW_D;
     const totalH   = rows * ROW_RISE;
     const backWall = new THREE.Mesh(
       axis === 'x'
