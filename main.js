@@ -840,6 +840,9 @@ document.getElementById('predict-overlay').addEventListener('click', () => close
     const original = toast.textContent;
     toast.textContent = labels[currentPick];
     closeModal('predict-overlay', 'predict-modal');
+    document.querySelectorAll('.predict-choice, .draw-option').forEach(e => e.classList.remove('selected'));
+    currentPick = null;
+    submitBtn.disabled = true;
     toast.classList.add('visible');
     setTimeout(() => {
       toast.classList.remove('visible');

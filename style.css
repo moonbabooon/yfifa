@@ -870,3 +870,4 @@ body {
 }
 #submit-prediction:not(:disabled) { opacity: 1; }
 #submit-prediction:not(:disabled):hover { transform: scale(1.02); }
+#submit-prediction:disabled { cursor: not-allowed; }
