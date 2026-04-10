@@ -774,3 +774,26 @@ window.addEventListener('resize', () => {
   tickCountdown();
   intervalId = setInterval(tickCountdown, 1000);
 }());
+
+// ── Team Stat Panels ──────────────────────────────────────────────────────────
+(function () {
+  const canadaPanel  = document.getElementById('canada-panel');
+  const bosniaPanel  = document.getElementById('bosnia-panel');
+  const canadaTrigger = document.getElementById('canada-trigger');
+  const bosniaTrigger = document.getElementById('bosnia-trigger');
+
+  canadaTrigger.addEventListener('click', () => {
+    canadaPanel.classList.toggle('open');
+  });
+
+  bosniaTrigger.addEventListener('click', () => {
+    bosniaPanel.classList.toggle('open');
+  });
+
+  document.querySelectorAll('.panel-close').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      document.getElementById(btn.dataset.target).classList.remove('open');
+    });
+  });
+}());
