@@ -364,11 +364,13 @@ function makeTrophy() {
 
 // ── Stadium ───────────────────────────────────────────────────────────────────
 function makeStadium() {
-  const concreteMat = new THREE.MeshStandardMaterial({ color: 0x1e1e24, roughness: 0.92, metalness: 0.05 });
-  const roofMat     = new THREE.MeshStandardMaterial({ color: 0x2a2a32, roughness: 0.85, metalness: 0.18, side: THREE.DoubleSide });
+  const concreteMat = new THREE.MeshStandardMaterial({ color: 0xc8bfa8, roughness: 0.90, metalness: 0.05 });
+  const roofMat     = new THREE.MeshStandardMaterial({ color: 0xb0a888, roughness: 0.85, metalness: 0.18, side: THREE.DoubleSide });
   const poleMat     = new THREE.MeshStandardMaterial({ color: 0xb0b2b8, metalness: 0.82, roughness: 0.22 });
-  const seatMat     = new THREE.MeshStandardMaterial({ color: 0x7a1010, roughness: 0.92, metalness: 0 });
-  const seatMat2    = new THREE.MeshStandardMaterial({ color: 0x8c1515, roughness: 0.92, metalness: 0 }); // alternating lighter row
+  const seatMat     = new THREE.MeshStandardMaterial({ color: 0xc8102e, roughness: 0.92, metalness: 0 }); // FIFA red
+  const seatMat2    = new THREE.MeshStandardMaterial({ color: 0x1a3880, roughness: 0.92, metalness: 0 }); // FIFA blue
+  const seatMat3    = new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.92, metalness: 0 }); // light grey
+  const seatMats    = [seatMat, seatMat2, seatMat3];
 
   // ── Grass apron ───────────────────────────────────────────────────────────
   const apron = new THREE.Mesh(
@@ -401,7 +403,7 @@ function makeStadium() {
     for (let i = 0; i < rows; i++) {
       const off  = startOff + (i + 0.5) * ROW_D;
       const yPos = i * ROW_RISE + ROW_THICK / 2;
-      const mat  = i % 2 === 0 ? seatMat : seatMat2;
+      const mat  = seatMats[i % 3];
 
       const mesh = new THREE.Mesh(
         axis === 'x'
