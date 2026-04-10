@@ -11,14 +11,11 @@ const toast      = document.getElementById('success-toast');
 
 let isDecline = false;
 
-const seatsField = form.querySelector('[name="guests"]');
-
 function openRsvp() {
   isDecline = false;
   title.textContent    = 'Are You Coming?';
   sub.textContent      = 'RSVP for the match';
   sendBtn.innerHTML    = 'Kick it in! <span class="btn-ball">⚽</span>';
-  seatsField.style.display = '';
   modal.classList.add('visible');
   overlay.classList.add('visible');
 }
@@ -28,7 +25,6 @@ function openDecline() {
   title.textContent    = "Can't Make It?";
   sub.textContent      = "Let us know — we'll miss you";
   sendBtn.innerHTML    = 'Send Decline <span class="btn-ball">😔</span>';
-  seatsField.style.display = 'none';
   modal.classList.add('visible');
   overlay.classList.add('visible');
 }
