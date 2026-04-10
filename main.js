@@ -445,6 +445,21 @@ function makeStadium() {
     scene.add(strip);
   });
 
+  // ── Scoreboard ────────────────────────────────────────────────────────────
+  const sbMat = new THREE.MeshStandardMaterial({ map: makeScoreboardTexture() });
+
+  // Support pillars
+  [-7, 7].forEach(px => {
+    const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.35, 14, 8), concreteMat);
+    pillar.position.set(px, 7, -58);
+    scene.add(pillar);
+  });
+
+  // Screen (faces +z toward camera / pitch)
+  const sbScreen = new THREE.Mesh(new THREE.BoxGeometry(16, 8, 0.4), sbMat);
+  sbScreen.position.set(0, 18, -58);
+  scene.add(sbScreen);
+
   function makeHoardingTexture(canvasW) {
     const H = 64;
     const cvs = document.createElement('canvas');
@@ -515,6 +530,49 @@ function makeStadium() {
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.wrapS = THREE.RepeatWrapping;
     tex.repeat.x = 4;
+    return tex;
+  }
+
+  function makeScoreboardTexture() {
+    const W = 512, H = 256;
+    const cvs = document.createElement('canvas');
+    cvs.width = W; cvs.height = H;
+    const ctx = cvs.getContext('2d');
+
+    ctx.fillStyle = '#0a0a14';
+    ctx.fillRect(0, 0, W, H);
+
+    // Header
+    ctx.fillStyle = '#e8c44a';
+    ctx.font = 'bold 20px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('FIFA WORLD CUP 2026', W / 2, 36);
+
+    // Divider
+    ctx.strokeStyle = '#e8c44a';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(20, 52); ctx.lineTo(W - 20, 52); ctx.stroke();
+
+    // Team names
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 26px Arial, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('CANADA', 24, 115);
+    ctx.textAlign = 'right';
+    ctx.fillText('BOSNIA & HERZ.', W - 24, 115);
+
+    // Score
+    ctx.font = 'bold 52px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('0 - 0', W / 2, 190);
+
+    // Footer
+    ctx.font = '15px Arial, sans-serif';
+    ctx.fillStyle = '#888888';
+    ctx.fillText('GROUP STAGE · TORONTO', W / 2, 232);
+
+    const tex = new THREE.CanvasTexture(cvs);
+    tex.colorSpace = THREE.SRGBColorSpace;
     return tex;
   }
 
