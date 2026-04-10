@@ -425,6 +425,26 @@ function makeStadium() {
     scene.add(flag);
   });
 
+  // ── Running track ─────────────────────────────────────────────────────────
+  const trackMat = new THREE.MeshStandardMaterial({ color: 0xc8603a, roughness: 0.95, metalness: 0 });
+  const TRACK_W  = 4.5;
+
+  // Long sides (east & west)
+  [-1, 1].forEach(sx => {
+    const strip = new THREE.Mesh(new THREE.PlaneGeometry(TRACK_W, 69), trackMat);
+    strip.rotation.x = -Math.PI / 2;
+    strip.position.set(sx * (20 + TRACK_W / 2), 0.005, 0);
+    scene.add(strip);
+  });
+
+  // End strips (north & south)
+  [-1, 1].forEach(sz => {
+    const strip = new THREE.Mesh(new THREE.PlaneGeometry(49, TRACK_W), trackMat);
+    strip.rotation.x = -Math.PI / 2;
+    strip.position.set(0, 0.005, sz * (30 + TRACK_W / 2));
+    scene.add(strip);
+  });
+
   function makeHoardingTexture(canvasW) {
     const H = 64;
     const cvs = document.createElement('canvas');
