@@ -790,7 +790,7 @@ window.addEventListener('resize', () => {
     bosniaPanel.classList.toggle('open');
   });
 
-  document.querySelectorAll('.panel-close').forEach(btn => {
+  document.querySelectorAll('.stat-panel-close').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
       document.getElementById(btn.dataset.target).classList.remove('open');

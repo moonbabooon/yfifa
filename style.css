@@ -588,7 +588,7 @@ body {
 .canada-country { color: #ff4444; }
 .bosnia-country { color: #4488ff; }
 
-.panel-close {
+.stat-panel-close {
   margin-left: auto;
   background: none;
   border: none;
@@ -598,7 +598,7 @@ body {
   transition: color 0.2s;
   line-height: 1;
 }
-.panel-close:hover { color: rgba(255,255,255,0.7); }
+.stat-panel-close:hover { color: rgba(255,255,255,0.7); }
 
 .stat-lbl {
   font-size: 8px;
