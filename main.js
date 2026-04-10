@@ -371,6 +371,11 @@ function makeStadium() {
   const seatMat2    = new THREE.MeshStandardMaterial({ color: 0x1a3880, roughness: 0.92, metalness: 0 }); // FIFA blue
   const seatMat3    = new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.92, metalness: 0 }); // light grey
   const seatMats    = [seatMat, seatMat2, seatMat3];
+  const riserMats = [
+    new THREE.MeshStandardMaterial({ color: 0xa00c24, roughness: 0.92, metalness: 0 }), // dark red
+    new THREE.MeshStandardMaterial({ color: 0x142d66, roughness: 0.92, metalness: 0 }), // dark blue
+    new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.92, metalness: 0 }), // dark grey
+  ];
 
   // ── Grass apron ───────────────────────────────────────────────────────────
   const apron = new THREE.Mesh(
@@ -418,6 +423,23 @@ function makeStadium() {
       );
       mesh.receiveShadow = true;
       scene.add(mesh);
+
+      // Riser face — vertical strip at front edge of each step (skip row 0, ground level)
+      if (i > 0) {
+        const riserH = ROW_RISE - ROW_THICK; // 1.05
+        const riser = new THREE.Mesh(
+          axis === 'x'
+            ? new THREE.BoxGeometry(0.12, riserH, standLen)
+            : new THREE.BoxGeometry(standLen, riserH, 0.12),
+          riserMats[i % 3]
+        );
+        riser.position.set(
+          axis === 'x' ? sign * (startOff + i * ROW_D) : 0,
+          i * ROW_RISE - riserH / 2,
+          axis === 'x' ? 0 : sign * (startOff + i * ROW_D)
+        );
+        scene.add(riser);
+      }
     }
 
     // Front concrete fascia (small kickboard at pitch edge)
