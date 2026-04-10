@@ -376,6 +376,11 @@ function makeStadium() {
     new THREE.MeshStandardMaterial({ color: 0x142d66, roughness: 0.92, metalness: 0 }), // dark blue
     new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.92, metalness: 0 }), // dark grey
   ];
+  const fasciaStripMats = [
+    new THREE.MeshStandardMaterial({ color: 0xc8102e, roughness: 0.9, metalness: 0 }),
+    new THREE.MeshStandardMaterial({ color: 0x1a3880, roughness: 0.9, metalness: 0 }),
+    new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.9, metalness: 0 }),
+  ];
 
   // ── Grass apron ───────────────────────────────────────────────────────────
   const apron = new THREE.Mesh(
@@ -440,6 +445,21 @@ function makeStadium() {
         );
         scene.add(riser);
       }
+
+      // Fascia colour band on front face of back wall at this tier height
+      const fasciaStrip = new THREE.Mesh(
+        axis === 'x'
+          ? new THREE.BoxGeometry(0.06, ROW_RISE * 0.65, standLen)
+          : new THREE.BoxGeometry(standLen, ROW_RISE * 0.65, 0.06),
+        fasciaStripMats[i % 3]
+      );
+      const backOff = startOff + rows * ROW_D;
+      fasciaStrip.position.set(
+        axis === 'x' ? sign * backOff : 0,
+        i * ROW_RISE + ROW_RISE / 2,
+        axis === 'x' ? 0 : sign * backOff
+      );
+      scene.add(fasciaStrip);
     }
 
     // Front concrete fascia (small kickboard at pitch edge)
