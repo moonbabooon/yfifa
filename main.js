@@ -797,3 +797,53 @@ window.addEventListener('resize', () => {
     });
   });
 }());
+
+// ── Modal Helpers ─────────────────────────────────────────────────────────────
+function openModal(overlayId, modalId) {
+  document.getElementById(overlayId).classList.add('open');
+  document.getElementById(modalId).classList.add('open');
+}
+function closeModal(overlayId, modalId) {
+  document.getElementById(overlayId).classList.remove('open');
+  document.getElementById(modalId).classList.remove('open');
+}
+
+document.querySelectorAll('.modal-close-btn').forEach(btn => {
+  btn.addEventListener('click', () => closeModal(btn.dataset.overlay, btn.dataset.modal));
+});
+document.getElementById('predict-overlay').addEventListener('click', () => closeModal('predict-overlay', 'predict-modal'));
+
+// ── Predict the Winner ────────────────────────────────────────────────────────
+(function () {
+  let currentPick = null;
+  const submitBtn = document.getElementById('submit-prediction');
+
+  document.getElementById('predict-btn').addEventListener('click', () => openModal('predict-overlay', 'predict-modal'));
+
+  document.querySelectorAll('.predict-choice, .draw-option').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.predict-choice, .draw-option').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+      currentPick = el.dataset.pick;
+      submitBtn.disabled = false;
+    });
+  });
+
+  submitBtn.addEventListener('click', () => {
+    if (!currentPick) return;
+    const labels = {
+      canada: '🍁 Canada win locked in!',
+      bosnia: '💙 Bosnia win locked in!',
+      draw:   '🤝 Draw locked in!'
+    };
+    const toast = document.getElementById('success-toast');
+    const original = toast.textContent;
+    toast.textContent = labels[currentPick];
+    closeModal('predict-overlay', 'predict-modal');
+    toast.classList.add('visible');
+    setTimeout(() => {
+      toast.classList.remove('visible');
+      setTimeout(() => { toast.textContent = original; }, 400);
+    }, 3500);
+  });
+}());

@@ -132,6 +132,47 @@
     </form>
   </div>
 
+  <!-- Bottom-left action buttons -->
+  <div id="bottom-left">
+    <div class="bl-btn" id="predict-btn">
+      <div class="bl-icon">🏆</div>
+      <div class="bl-labels">
+        <span class="bl-title predict-title">PREDICT THE WINNER</span>
+        <span class="bl-sub">WHO TAKES IT?</span>
+      </div>
+    </div>
+    <div class="bl-btn" id="programme-btn">
+      <div class="bl-icon">📋</div>
+      <div class="bl-labels">
+        <span class="bl-title programme-title">MATCH PROGRAMME</span>
+        <span class="bl-sub">THE FULL STORY</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Predict overlay -->
+  <div class="modal-overlay" id="predict-overlay"></div>
+  <div class="modal-box" id="predict-modal">
+    <button class="modal-close-btn" data-overlay="predict-overlay" data-modal="predict-modal">✕</button>
+    <div class="modal-eyebrow">Before the whistle blows</div>
+    <div class="modal-title-text">WHO WINS ON JUNE 12?</div>
+    <div class="modal-sub-text">Your prediction is on record.</div>
+    <div class="predict-choices">
+      <div class="predict-choice canada-pick" data-pick="canada">
+        <img src="https://flagcdn.com/w160/ca.png" class="choice-flag" alt="Canada" />
+        <div class="choice-name canada-choice-name">CANADA</div>
+        <div class="choice-label">Home advantage</div>
+      </div>
+      <div class="predict-choice bosnia-pick" data-pick="bosnia">
+        <img src="https://flagcdn.com/w160/ba.png" class="choice-flag" alt="Bosnia" />
+        <div class="choice-name bosnia-choice-name">BOSNIA</div>
+        <div class="choice-label">European flair</div>
+      </div>
+    </div>
+    <div class="draw-option" data-pick="draw">IT'S A DRAW &nbsp;·&nbsp; 90 MINS ISN'T ENOUGH</div>
+    <button id="submit-prediction" disabled>LOCK IN MY PREDICTION</button>
+  </div>
+
   <div id="success-toast">You're on the team sheet! See you in Toronto 🍁</div>
 
   <script src="contact.js"></script>
