@@ -837,7 +837,7 @@ document.getElementById('predict-overlay').addEventListener('click', () => close
       draw:   '🤝 Draw locked in!'
     };
     const toast = document.getElementById('success-toast');
-    const original = toast.textContent;
+    const original = "You're on the team sheet! See you in Toronto 🍁";
     toast.textContent = labels[currentPick];
     closeModal('predict-overlay', 'predict-modal');
     document.querySelectorAll('.predict-choice, .draw-option').forEach(e => e.classList.remove('selected'));
