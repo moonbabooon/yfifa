@@ -479,3 +479,49 @@ body {
   background-size: 200px 200px;
   mix-blend-mode: overlay;
 }
+
+/* ── Countdown ───────────────────────────────────────────────────── */
+#countdown {
+  position: fixed;
+  top: 208px; left: 50%; transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.count-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0,0,0,0.58);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(201,162,39,0.22);
+  border-radius: 10px;
+  padding: 10px 13px 8px;
+  min-width: 54px;
+}
+
+.count-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 30px;
+  color: #e8c547;
+  line-height: 1;
+}
+
+.count-label {
+  font-size: 7px;
+  letter-spacing: 2.5px;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  font-weight: 300;
+  margin-top: 3px;
+}
+
+.count-sep {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  color: rgba(201,162,39,0.25);
+  margin-top: -6px;
+}

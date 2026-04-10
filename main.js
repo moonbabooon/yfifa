@@ -753,3 +753,20 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// ── Countdown Timer ───────────────────────────────────────────────────────────
+(function () {
+  const matchDate = new Date('2026-06-12T15:00:00-04:00');
+
+  function tickCountdown() {
+    const diff = matchDate - new Date();
+    if (diff <= 0) return;
+    document.getElementById('cd-days').textContent = String(Math.floor(diff / 86400000)).padStart(2, '0');
+    document.getElementById('cd-hrs').textContent  = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+    document.getElementById('cd-mins').textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+    document.getElementById('cd-secs').textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+  }
+
+  tickCountdown();
+  setInterval(tickCountdown, 1000);
+}());
