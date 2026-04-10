@@ -382,6 +382,13 @@ function makeStadium() {
     new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.9, metalness: 0 }),
   ];
 
+  seatMat.map  = makeCrowdTexture(0xc8102e);
+  seatMat2.map = makeCrowdTexture(0x1a3880);
+  seatMat3.map = makeCrowdTexture(0xd8d8d8);
+  seatMat.needsUpdate  = true;
+  seatMat2.needsUpdate = true;
+  seatMat3.needsUpdate = true;
+
   // ── Grass apron ───────────────────────────────────────────────────────────
   const apron = new THREE.Mesh(
     new THREE.PlaneGeometry(110, 130),
@@ -401,6 +408,49 @@ function makeStadium() {
     const b = new THREE.Mesh(new THREE.BoxGeometry(41.5, 0.8, 0.2), adMat);
     b.position.set(0, 0.4, z); scene.add(b);
   });
+
+  function makeCrowdTexture(seatHex) {
+    const W = 512, H = 128;
+    const cvs = document.createElement('canvas');
+    cvs.width = W; cvs.height = H;
+    const ctx = cvs.getContext('2d');
+
+    const r = (seatHex >> 16) & 0xff;
+    const g = (seatHex >> 8)  & 0xff;
+    const b =  seatHex        & 0xff;
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.fillRect(0, 0, W, H);
+
+    const shirts = ['#4a6040','#2a6060','#1e2a50','#363636','#9a8030','#6a1830','#5a3a20'];
+    const skins  = ['#f5c8a0','#e8b080','#c88050','#a06030','#7a4420'];
+    const cols = 88, dotRows = 4;
+
+    for (let row = 0; row < dotRows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x  = (col + 0.5) * (W / cols) + (Math.random() - 0.5) * 2;
+        const y  = (row + 0.5) * (H / dotRows) + (Math.random() - 0.5) * 3;
+        const dr = 3.5;
+        ctx.beginPath();
+        ctx.arc(x, y + dr * 1.1, dr * 1.3, 0, Math.PI * 2);
+        ctx.fillStyle = shirts[Math.floor(Math.random() * shirts.length)];
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x, y, dr, 0, Math.PI * 2);
+        ctx.fillStyle = skins[Math.floor(Math.random() * skins.length)];
+        ctx.fill();
+      }
+    }
+
+    ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(W, 0); ctx.stroke();
+
+    const tex = new THREE.CanvasTexture(cvs);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.repeat.x = 4;
+    return tex;
+  }
 
   // ── Stand builder ─────────────────────────────────────────────────────────
   // axis='x' → long sides (left/right), axis='z' → end stands (north/south)
