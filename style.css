@@ -26,7 +26,7 @@ body {
 #header {
   position: fixed;
   top: 0; left: 0; right: 0;
-  padding: 18px 24px;
+  padding: 18px 24px 14px;
   text-align: center;
   z-index: 12;
   pointer-events: none;
@@ -41,12 +41,13 @@ body {
 }
 
 .match-venue {
-  font-size: clamp(11px, 1.3vw, 14px);
+  font-size: 12px;
   letter-spacing: 3px;
-  color: rgba(255,255,255,0.75);
+  color: rgba(255,255,255,0.92);
   margin-top: 6px;
   text-transform: uppercase;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  font-weight: 400;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.7);
 }
 
 /* ── VS Banner ───────────────────────────────────────────────────── */
@@ -62,7 +63,7 @@ body {
   border-radius: 14px;
   padding: 14px 40px;
   z-index: 10;
-  pointer-events: none;
+  pointer-events: all;
   white-space: nowrap;
   box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(201,162,39,0.25);
 }
@@ -72,6 +73,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  cursor: pointer;
 }
 
 .team-flag {
@@ -453,4 +455,13 @@ body {
 #success-toast.visible {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* ── Tap Hint ────────────────────────────────────────────────────── */
+.tap-hint {
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.28);
+  text-transform: uppercase;
+  font-weight: 300;
 }
