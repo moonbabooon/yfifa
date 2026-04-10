@@ -507,6 +507,12 @@ function makeStadium() {
       totalH + 2.2,
       axis === 'x' ? 0 : sign * roofCenter
     );
+    // Tilt roof toward pitch (~8.6°)
+    if (axis === 'x') {
+      roof.rotation.z = sign * 0.15;
+    } else {
+      roof.rotation.x = -sign * 0.15;
+    }
     scene.add(roof);
 
     // Roof support columns (one per ~15 units of stand length)
