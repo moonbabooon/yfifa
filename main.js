@@ -540,18 +540,35 @@ function makeStadium() {
   addStand('z', -1, 30.5, 46, 9);
   addStand('z',  1, 30.5, 46, 9);
 
-  // ── Corner concrete blocks ────────────────────────────────────────────────
-  const LONG_BACK = 21.5 + 12 * ROW_D; // ~43.1
-  const END_BACK  = 30.5 + 9  * ROW_D; // ~46.7
-  const LONG_H    = 12 * ROW_RISE;
-  const END_H     = 9  * ROW_RISE;
+  // ── Corner stands (raked seating) ─────────────────────────────────────────
+  const LONG_BACK = 21.5 + 12 * ROW_D; // 43.1
+  const END_BACK  = 30.5 + 9  * ROW_D; // 46.7
+  const CORNER_ROWS = 9; // match end-stand row count
+  const cw = LONG_BACK - 21.5; // 21.6
+  const cd = END_BACK  - 30.5; // 16.2
+
   [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([sx,sz]) => {
-    const cw = LONG_BACK - 21.5; // corner width matches stand depth
-    const cd = END_BACK  - 30.5;
-    const ch = Math.min(LONG_H, END_H) * 0.85;
-    const corner = new THREE.Mesh(new THREE.BoxGeometry(cw, ch, cd), concreteMat);
-    corner.position.set(sx * (21.5 + cw / 2), ch / 2, sz * (30.5 + cd / 2));
-    scene.add(corner);
+    for (let i = 0; i < CORNER_ROWS; i++) {
+      const yPos = i * ROW_RISE + ROW_THICK / 2;
+      const cornerRow = new THREE.Mesh(
+        new THREE.BoxGeometry(cw, ROW_THICK, cd),
+        seatMats[i % 3]
+      );
+      cornerRow.position.set(sx * (21.5 + cw / 2), yPos, sz * (30.5 + cd / 2));
+      cornerRow.receiveShadow = true;
+      scene.add(cornerRow);
+
+      // Riser
+      if (i > 0) {
+        const riserH = ROW_RISE - ROW_THICK;
+        const cRiser = new THREE.Mesh(
+          new THREE.BoxGeometry(cw, riserH, cd),
+          riserMats[i % 3]
+        );
+        cRiser.position.set(sx * (21.5 + cw / 2), i * ROW_RISE - riserH / 2, sz * (30.5 + cd / 2));
+        scene.add(cRiser);
+      }
+    }
   });
 
   // ── Floodlight masts (behind back walls, 4 corners) ───────────────────────
