@@ -399,15 +399,46 @@ function makeStadium() {
   scene.add(apron);
 
   // ── Advertising hoardings ─────────────────────────────────────────────────
-  const adMat = new THREE.MeshStandardMaterial({ color: 0x1a3880 });
+  const adMatSide = new THREE.MeshStandardMaterial({ map: makeHoardingTexture(1024) });
+  const adMatEnd  = new THREE.MeshStandardMaterial({ map: makeHoardingTexture(512)  });
   [-20.6, 20.6].forEach(x => {
-    const b = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 61), adMat);
+    const b = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 61), adMatSide);
     b.position.set(x, 0.4, 0); scene.add(b);
   });
   [-30.4, 30.4].forEach(z => {
-    const b = new THREE.Mesh(new THREE.BoxGeometry(41.5, 0.8, 0.2), adMat);
+    const b = new THREE.Mesh(new THREE.BoxGeometry(41.5, 0.8, 0.2), adMatEnd);
     b.position.set(0, 0.4, z); scene.add(b);
   });
+
+  function makeHoardingTexture(canvasW) {
+    const H = 64;
+    const cvs = document.createElement('canvas');
+    cvs.width = canvasW; cvs.height = H;
+    const ctx = cvs.getContext('2d');
+
+    ctx.fillStyle = '#1a3880';
+    ctx.fillRect(0, 0, canvasW, H);
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, 1);     ctx.lineTo(canvasW, 1);     ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, H - 1); ctx.lineTo(canvasW, H - 1); ctx.stroke();
+
+    ctx.fillStyle  = '#ffffff';
+    ctx.font       = 'bold 18px Arial, sans-serif';
+    ctx.textAlign  = 'center';
+    ctx.textBaseline = 'middle';
+    const phrases = ['FIFA WORLD CUP 2026', 'CANADA · MEXICO · USA'];
+    const spacing = 220;
+    for (let x = spacing / 2; x < canvasW; x += spacing) {
+      ctx.fillText(phrases[Math.floor(x / spacing) % 2], x, H / 2);
+    }
+
+    const tex = new THREE.CanvasTexture(cvs);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
 
   function makeCrowdTexture(seatHex) {
     const W = 512, H = 128;
