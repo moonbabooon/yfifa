@@ -382,25 +382,6 @@ function makeStadium() {
     new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.9, metalness: 0 }),
   ];
 
-  // End stands / corners: axis='z', BoxGeometry(standLen, ROW_THICK, ROW_D)
-  //   top-face U maps along X (standLen) → wrapS repeat.x
-  seatMat.map  = (() => { const t = makeCrowdTexture(0xc8102e); t.wrapS = THREE.RepeatWrapping; t.repeat.x = 4; return t; })();
-  seatMat2.map = (() => { const t = makeCrowdTexture(0x1a3880); t.wrapS = THREE.RepeatWrapping; t.repeat.x = 4; return t; })();
-  seatMat3.map = (() => { const t = makeCrowdTexture(0xd8d8d8); t.wrapS = THREE.RepeatWrapping; t.repeat.x = 4; return t; })();
-  seatMat.needsUpdate  = true;
-  seatMat2.needsUpdate = true;
-  seatMat3.needsUpdate = true;
-
-  // Long sides: axis='x', BoxGeometry(ROW_D, ROW_THICK, standLen=80)
-  //   top-face U maps along X (ROW_D=1.8, narrow!) → must tile on V instead
-  const seatMatX  = new THREE.MeshStandardMaterial({ color: 0xc8102e, roughness: 0.92, metalness: 0 });
-  const seatMat2X = new THREE.MeshStandardMaterial({ color: 0x1a3880, roughness: 0.92, metalness: 0 });
-  const seatMat3X = new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.92, metalness: 0 });
-  seatMatX.map  = (() => { const t = makeCrowdTexture(0xc8102e); t.wrapT = THREE.RepeatWrapping; t.repeat.y = 10; return t; })();
-  seatMat2X.map = (() => { const t = makeCrowdTexture(0x1a3880); t.wrapT = THREE.RepeatWrapping; t.repeat.y = 10; return t; })();
-  seatMat3X.map = (() => { const t = makeCrowdTexture(0xd8d8d8); t.wrapT = THREE.RepeatWrapping; t.repeat.y = 10; return t; })();
-  seatMatX.needsUpdate = seatMat2X.needsUpdate = seatMat3X.needsUpdate = true;
-  const seatMatsX = [seatMatX, seatMat2X, seatMat3X];
 
   // ── Grass apron ───────────────────────────────────────────────────────────
   const apron = new THREE.Mesh(
@@ -503,47 +484,6 @@ function makeStadium() {
     return tex;
   }
 
-  function makeCrowdTexture(seatHex) {
-    const W = 512, H = 128;
-    const cvs = document.createElement('canvas');
-    cvs.width = W; cvs.height = H;
-    const ctx = cvs.getContext('2d');
-
-    const r = (seatHex >> 16) & 0xff;
-    const g = (seatHex >> 8)  & 0xff;
-    const b =  seatHex        & 0xff;
-    ctx.fillStyle = `rgb(${r},${g},${b})`;
-    ctx.fillRect(0, 0, W, H);
-
-    const shirts = ['#ffffff','#ffee22','#ff6600','#00cc44','#22aacc','#ff2266','#aaaaff','#888888'];
-    const skins  = ['#f5c8a0','#e8b080','#c88050','#a06030','#7a4420'];
-    const cols = 64, dotRows = 4;
-
-    for (let row = 0; row < dotRows; row++) {
-      for (let col = 0; col < cols; col++) {
-        const x  = (col + 0.5) * (W / cols) + (Math.random() - 0.5) * 2;
-        const y  = (row + 0.5) * (H / dotRows) + (Math.random() - 0.5) * 3;
-        const dr = 5;
-        ctx.beginPath();
-        ctx.arc(x, y + dr * 1.1, dr * 1.3, 0, Math.PI * 2);
-        ctx.fillStyle = shirts[Math.floor(Math.random() * shirts.length)];
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(x, y, dr, 0, Math.PI * 2);
-        ctx.fillStyle = skins[Math.floor(Math.random() * skins.length)];
-        ctx.fill();
-      }
-    }
-
-    ctx.strokeStyle = 'rgba(0,0,0,0.45)';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(W, 0); ctx.stroke();
-
-    const tex = new THREE.CanvasTexture(cvs);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    return tex;
-  }
-
   function makeScoreboardTexture() {
     const W = 512, H = 256;
     const cvs = document.createElement('canvas');
@@ -599,7 +539,7 @@ function makeStadium() {
     for (let i = 0; i < rows; i++) {
       const off  = startOff + (i + 0.5) * ROW_D;
       const yPos = i * ROW_RISE + ROW_THICK / 2;
-      const mat  = (axis === 'x' ? seatMatsX : seatMats)[i % 3];
+      const mat  = seatMats[i % 3];
 
       const mesh = new THREE.Mesh(
         axis === 'x'
@@ -791,6 +731,68 @@ function makeStadium() {
       }
     }
   });
+
+  // ── Crowd heads (instanced spheres) ──────────────────────────────────────
+  {
+    const HEAD_R  = 0.26;
+    const SPACING = 1.05;
+    const headGeo = new THREE.SphereGeometry(HEAD_R, 5, 4);
+    const palette = [
+      0xf5c8a0, 0xe8b080, 0xc88050, 0xa06030, 0x7a4420,  // skin tones (more weight)
+      0xf5c8a0, 0xe8b080, 0xc88050,
+      0xffffff, 0xffdd22, 0xff6600, 0x22aa55, 0x4488ff, 0xff2244, 0xaa88ff,
+    ];
+    const posArr = [], colArr = [];
+    const dummy  = new THREE.Object3D();
+    const col    = new THREE.Color();
+    const ABOVE  = ROW_THICK / 2 + HEAD_R + 0.06;
+
+    function pushRow(cx, cy, cz, runAxis, length) {
+      const count = Math.floor(length / SPACING);
+      for (let k = 0; k < count; k++) {
+        const off = (k + 0.5) * SPACING - length / 2;
+        posArr.push(runAxis === 'x' ? cx + off : cx, cy, runAxis === 'z' ? cz + off : cz);
+        colArr.push(palette[Math.floor(Math.random() * palette.length)]);
+      }
+    }
+
+    // Long sides (geometry BOX depth=ROW_D along X, length=80 along Z)
+    for (const sign of [-1, 1]) {
+      for (let i = 0; i < 12; i++) {
+        pushRow(sign * (21.5 + (i + 0.5) * ROW_D), i * ROW_RISE + ABOVE, 0, 'z', 80);
+      }
+    }
+    // End stands (length=46 along X)
+    for (const sign of [-1, 1]) {
+      for (let i = 0; i < 9; i++) {
+        pushRow(0, i * ROW_RISE + ABOVE, sign * (30.5 + (i + 0.5) * ROW_D), 'x', 46);
+      }
+    }
+    // Corners (run along cw dimension)
+    [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([sx, sz]) => {
+      for (let i = 0; i < CORNER_ROWS; i++) {
+        pushRow(sx * (21.5 + cw / 2), i * ROW_RISE + ABOVE, sz * (30.5 + cd / 2), 'x', cw);
+      }
+    });
+
+    const total    = posArr.length / 3;
+    const headMesh = new THREE.InstancedMesh(
+      headGeo,
+      new THREE.MeshStandardMaterial({ roughness: 0.85, metalness: 0 }),
+      total
+    );
+    headMesh.castShadow = headMesh.receiveShadow = true;
+    for (let i = 0; i < total; i++) {
+      dummy.position.set(posArr[i * 3], posArr[i * 3 + 1], posArr[i * 3 + 2]);
+      dummy.updateMatrix();
+      headMesh.setMatrixAt(i, dummy.matrix);
+      col.setHex(colArr[i]);
+      headMesh.setColorAt(i, col);
+    }
+    headMesh.instanceMatrix.needsUpdate = true;
+    headMesh.instanceColor.needsUpdate  = true;
+    scene.add(headMesh);
+  }
 
   // ── Floodlight masts (behind back walls, 4 corners) ───────────────────────
   const POLE_H = 32;
