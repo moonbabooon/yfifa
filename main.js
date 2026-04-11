@@ -767,13 +767,6 @@ function makeStadium() {
         pushRow(0, i * ROW_RISE + ABOVE, sign * (30.5 + (i + 0.5) * ROW_D), 'x', 46);
       }
     }
-    // Corners (run along cw dimension)
-    [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([sx, sz]) => {
-      for (let i = 0; i < CORNER_ROWS; i++) {
-        pushRow(sx * (21.5 + cw / 2), i * ROW_RISE + ABOVE, sz * (30.5 + cd / 2), 'x', cw);
-      }
-    });
-
     const total    = posArr.length / 3;
     const headMesh = new THREE.InstancedMesh(
       headGeo,
