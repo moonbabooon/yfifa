@@ -1055,11 +1055,24 @@ function animate() {
 animate();
 
 // ── Resize ────────────────────────────────────────────────────────────────────
+function applyMobileCamera() {
+  const portrait = window.innerWidth < 600 && window.innerHeight > window.innerWidth;
+  if (portrait) {
+    camera.position.set(0, 32, 68);
+    camera.fov = 62;
+  } else {
+    camera.position.set(0, 38, 88);
+    camera.fov = 52;
+  }
+  camera.updateProjectionMatrix();
+}
+
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  applyMobileCamera();
 });
+applyMobileCamera();
 
 // ── Countdown Timer ───────────────────────────────────────────────────────────
 (function () {
