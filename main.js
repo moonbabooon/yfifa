@@ -743,9 +743,8 @@ function makeStadium() {
       0xffffff, 0xffdd22, 0xff6600, 0x22aa55, 0x4488ff, 0xff2244, 0xaa88ff,
     ];
     const posArr = [], colArr = [];
-    const dummy  = new THREE.Object3D();
     const col    = new THREE.Color();
-    const ABOVE  = ROW_THICK / 2 + HEAD_R + 0.06;
+    const ABOVE  = ROW_THICK + HEAD_R + 0.06;  // above top surface of seat box
 
     function pushRow(cx, cy, cz, runAxis, length) {
       const count = Math.floor(length / SPACING);
@@ -783,15 +782,18 @@ function makeStadium() {
     );
     headMesh.castShadow = headMesh.receiveShadow = true;
     for (let i = 0; i < total; i++) {
-      dummy.position.set(posArr[i * 3], posArr[i * 3 + 1], posArr[i * 3 + 2]);
-      dummy.updateMatrix();
-      headMesh.setMatrixAt(i, dummy.matrix);
+      crowdDummy.position.set(posArr[i * 3], posArr[i * 3 + 1], posArr[i * 3 + 2]);
+      crowdDummy.updateMatrix();
+      headMesh.setMatrixAt(i, crowdDummy.matrix);
       col.setHex(colArr[i]);
       headMesh.setColorAt(i, col);
+      crowdPos.push(posArr[i * 3], posArr[i * 3 + 1], posArr[i * 3 + 2]);
+      crowdPhase.push(Math.random() * Math.PI * 2);
     }
     headMesh.instanceMatrix.needsUpdate = true;
     headMesh.instanceColor.needsUpdate  = true;
     scene.add(headMesh);
+    crowdMesh = headMesh;
   }
 
   // ── Floodlight masts (behind back walls, 4 corners) ───────────────────────
@@ -838,6 +840,12 @@ function makeStadium() {
     scene.add(spot.target);
   });
 }
+
+// Crowd bob state (populated by makeStadium, used in animate)
+let   crowdMesh  = null;
+const crowdPos   = [];   // flat [x,y,z, …]
+const crowdPhase = [];   // random phase per head
+const crowdDummy = new THREE.Object3D();
 
 makeStadium();
 
@@ -1029,6 +1037,20 @@ function animate() {
     const shake = Math.sin(netShakeT * 18) * Math.exp(-netShakeT * 3);
     goalFar.scale.set(1, 1 + shake * 0.06, 1 + shake * 0.12);
     if (netShakeT > 2) { netShaking = false; goalFar.scale.set(1, 1, 1); }
+  }
+
+  // Crowd bob
+  if (crowdMesh) {
+    for (let i = 0; i < crowdMesh.count; i++) {
+      crowdDummy.position.set(
+        crowdPos[i * 3],
+        crowdPos[i * 3 + 1] + Math.sin(t * 2.2 + crowdPhase[i]) * 0.09,
+        crowdPos[i * 3 + 2]
+      );
+      crowdDummy.updateMatrix();
+      crowdMesh.setMatrixAt(i, crowdDummy.matrix);
+    }
+    crowdMesh.instanceMatrix.needsUpdate = true;
   }
 
   controls.update();
