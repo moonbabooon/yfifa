@@ -833,58 +833,7 @@ function makeStadium() {
     scene.add(spot.target);
   });
 
-  // ── Player tunnel entrances (centre of each long-side stand) ─────────────
-  {
-    const TUN_W   = 5.0;   // opening width (Z)
-    const TUN_H   = 3.4;   // opening height
-    const ARCH_T  = 0.5;   // frame thickness
-    const CAN_D   = 4.5;   // canopy depth toward pitch
 
-    const archMat = new THREE.MeshStandardMaterial({ color: 0xcfc7b4, roughness: 0.82, metalness: 0.06 });
-    const darkMat = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 1,    metalness: 0, side: THREE.DoubleSide });
-    const redMat  = new THREE.MeshStandardMaterial({ color: 0xc8102e, roughness: 0.8,  metalness: 0.05 });
-
-    [-1, 1].forEach(sign => {
-      // Dark tunnel mouth — fractionally inside stand face to avoid z-fighting
-      const mouth = new THREE.Mesh(new THREE.PlaneGeometry(TUN_W, TUN_H), darkMat);
-      mouth.rotation.y = sign * Math.PI / 2;
-      mouth.position.set(sign * (21.5 - 0.02), TUN_H / 2, 0);
-      scene.add(mouth);
-
-      // Arch frame (protrudes slightly toward pitch)
-      const ax = sign * (21.5 - ARCH_T / 2);
-
-      // Side posts
-      for (const zSide of [-(TUN_W / 2 + ARCH_T / 2), TUN_W / 2 + ARCH_T / 2]) {
-        const post = new THREE.Mesh(new THREE.BoxGeometry(ARCH_T, TUN_H + ARCH_T, ARCH_T), archMat);
-        post.position.set(ax, (TUN_H + ARCH_T) / 2, zSide);
-        post.castShadow = true;
-        scene.add(post);
-      }
-
-      // Lintel
-      const lintel = new THREE.Mesh(new THREE.BoxGeometry(ARCH_T, ARCH_T, TUN_W + ARCH_T * 2), archMat);
-      lintel.position.set(ax, TUN_H + ARCH_T / 2, 0);
-      scene.add(lintel);
-
-      // FIFA-red accent band above lintel
-      const accent = new THREE.Mesh(new THREE.BoxGeometry(ARCH_T * 0.7, ARCH_T * 0.55, TUN_W + ARCH_T * 2 + 0.1), redMat);
-      accent.position.set(ax, TUN_H + ARCH_T + ARCH_T * 0.28, 0);
-      scene.add(accent);
-
-      // Canopy extending toward pitch
-      const canopyCX = sign * (21.5 - ARCH_T / 2 - CAN_D / 2);
-      const canopy = new THREE.Mesh(new THREE.BoxGeometry(CAN_D, ARCH_T * 0.55, TUN_W + ARCH_T * 2), archMat);
-      canopy.position.set(canopyCX, TUN_H + ARCH_T * 0.72, 0);
-      canopy.castShadow = true;
-      scene.add(canopy);
-
-      // Threshold step at ground level
-      const step = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.18, TUN_W + ARCH_T * 2), archMat);
-      step.position.set(sign * (21.5 - 0.45), 0.09, 0);
-      scene.add(step);
-    });
-  }
 }
 
 // Crowd bob state (populated by makeStadium, used in animate)
