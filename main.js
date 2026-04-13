@@ -773,7 +773,8 @@ function makeStadium() {
       new THREE.MeshStandardMaterial({ roughness: 0.85, metalness: 0 }),
       total
     );
-    headMesh.castShadow = headMesh.receiveShadow = true;
+    headMesh.castShadow = false;
+    headMesh.receiveShadow = true;
     for (let i = 0; i < total; i++) {
       crowdDummy.position.set(posArr[i * 3], posArr[i * 3 + 1], posArr[i * 3 + 2]);
       crowdDummy.updateMatrix();
