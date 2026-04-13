@@ -173,9 +173,9 @@ body {
 }
 
 .panel-subtitle {
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: 2px;
-  color: rgba(255,255,255,0.35);
+  color: rgba(255,255,255,0.45);
   text-transform: uppercase;
   margin-bottom: 18px;
 }
@@ -187,9 +187,9 @@ body {
   gap: 10px;
   align-items: flex-start;
   font-size: 13px;
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.75);
   margin-bottom: 9px;
-  line-height: 1.4;
+  line-height: 1.55;
 }
 .detail-icon { flex-shrink: 0; }
 
@@ -383,9 +383,9 @@ body {
 
 .contact-sub {
   text-align: center;
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: 2px;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.42);
   text-transform: uppercase;
   margin-bottom: 22px;
 }
@@ -511,9 +511,9 @@ body {
 }
 
 .count-label {
-  font-size: 7px;
-  letter-spacing: 2.5px;
-  color: rgba(255,255,255,0.35);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.45);
   text-transform: uppercase;
   font-weight: 300;
   margin-top: 3px;
@@ -601,9 +601,9 @@ body {
 .stat-panel-close:hover { color: rgba(255,255,255,0.7); }
 
 .stat-lbl {
-  font-size: 8px;
-  letter-spacing: 2.5px;
-  color: rgba(255,255,255,0.22);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.42);
   text-transform: uppercase;
   font-weight: 500;
   margin-bottom: 4px;
@@ -636,7 +636,7 @@ body {
   font-size: 12px;
   color: rgba(255,255,255,0.78);
   padding: 5px 0;
-  line-height: 1.4;
+  line-height: 1.55;
   border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 
@@ -762,8 +762,8 @@ body {
 
 .modal-eyebrow {
   font-size: 9px;
-  letter-spacing: 3px;
-  color: rgba(255,255,255,0.25);
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.42);
   text-transform: uppercase;
   text-align: center;
   margin-bottom: 8px;
@@ -778,10 +778,10 @@ body {
 }
 
 .modal-sub-text {
-  font-family: 'Playfair Display', serif;
-  font-style: italic;
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
   font-size: 13px;
-  color: rgba(255,255,255,0.65);
+  color: rgba(255,255,255,0.6);
   text-align: center;
   margin-bottom: 24px;
 }
@@ -901,12 +901,12 @@ body {
 
 .prog-eyebrow {
   font-size: 9px;
-  letter-spacing: 4px;
+  letter-spacing: 2px;
   color: #c9a227;
   text-transform: uppercase;
   font-weight: 500;
   margin-bottom: 10px;
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 .prog-title {
@@ -919,10 +919,10 @@ body {
 }
 
 .prog-subtitle {
-  font-family: 'Playfair Display', serif;
-  font-style: italic;
-  font-size: 14px;
-  color: rgba(255,255,255,0.4);
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
   margin-bottom: 20px;
 }
 
@@ -1000,10 +1000,11 @@ body {
 }
 
 .prog-para {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
   font-size: 13px;
   color: rgba(255,255,255,0.78);
-  line-height: 1.85;
+  line-height: 1.7;
   margin-bottom: 10px;
 }
 
@@ -1022,7 +1023,7 @@ body {
 }
 
 .prog-stat-label {
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 2px;
   color: rgba(255,255,255,0.5);
   text-transform: uppercase;
@@ -1104,7 +1105,7 @@ body {
 .prog-venue-icon { font-size: 22px; margin-bottom: 6px; }
 
 .prog-venue-label {
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 2px;
   color: rgba(255,255,255,0.5);
   text-transform: uppercase;
