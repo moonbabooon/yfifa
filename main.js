@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { castVote, subscribeTotals, getSavedPick, savePick } from './predictions.js';
 
 // ── Renderer ──────────────────────────────────────────────────────────────────
 const canvas = document.getElementById('canvas');
@@ -1136,10 +1137,46 @@ document.getElementById('predict-overlay').addEventListener('click', () => close
 
 // ── Predict the Winner ────────────────────────────────────────────────────────
 (function () {
-  let currentPick = null;
-  const submitBtn = document.getElementById('submit-prediction');
+  let currentPick  = null;
+  let tallyStarted = false;
+  const modal      = document.getElementById('predict-modal');
+  const submitBtn  = document.getElementById('submit-prediction');
 
-  document.getElementById('predict-btn').addEventListener('click', () => openModal('predict-overlay', 'predict-modal'));
+  const pickLabels = {
+    canada: '🍁 CANADA',
+    bosnia: '💙 BOSNIA',
+    draw:   '🤝 DRAW',
+  };
+
+  function updateTallyUI({ canada, bosnia, draw }) {
+    const total = canada + bosnia + draw;
+    document.getElementById('tally-total').textContent =
+      total ? `${total.toLocaleString()} VOTES` : 'BE THE FIRST';
+    const pct = n => total ? Math.round((n / total) * 100) : 0;
+    [['canada', canada], ['bosnia', bosnia], ['draw', draw]].forEach(([k, v]) => {
+      document.getElementById(`bar-${k}`).style.width = pct(v) + '%';
+      document.getElementById(`pct-${k}`).textContent  = pct(v) + '%';
+    });
+  }
+
+  function showTally(pick) {
+    document.getElementById('your-pick-value').textContent = pickLabels[pick] || pick.toUpperCase();
+    modal.classList.add('voted');
+    if (!tallyStarted) {
+      tallyStarted = true;
+      subscribeTotals(updateTallyUI);
+    }
+  }
+
+  document.getElementById('predict-btn').addEventListener('click', () => {
+    openModal('predict-overlay', 'predict-modal');
+    const saved = getSavedPick();
+    if (saved) {
+      showTally(saved);
+    } else {
+      modal.classList.remove('voted');
+    }
+  });
 
   document.querySelectorAll('.predict-choice, .draw-option').forEach(el => {
     el.addEventListener('click', () => {
@@ -1152,23 +1189,27 @@ document.getElementById('predict-overlay').addEventListener('click', () => close
 
   submitBtn.addEventListener('click', () => {
     if (!currentPick) return;
-    const labels = {
+    const pick = currentPick;
+    savePick(pick);
+    castVote(pick);
+
+    const toastLabels = {
       canada: '🍁 Canada win locked in!',
       bosnia: '💙 Bosnia win locked in!',
-      draw:   '🤝 Draw locked in!'
+      draw:   '🤝 Draw locked in!',
     };
     const toast = document.getElementById('success-toast');
-    const original = "You're on the team sheet! See you in Toronto 🍁";
-    toast.textContent = labels[currentPick];
-    closeModal('predict-overlay', 'predict-modal');
-    document.querySelectorAll('.predict-choice, .draw-option').forEach(e => e.classList.remove('selected'));
-    currentPick = null;
-    submitBtn.disabled = true;
+    toast.textContent = toastLabels[pick];
     toast.classList.add('visible');
     setTimeout(() => {
       toast.classList.remove('visible');
-      setTimeout(() => { toast.textContent = original; }, 400);
-    }, 3500);
+      setTimeout(() => { toast.textContent = "You're on the team sheet! See you in Toronto 🍁"; }, 400);
+    }, 3000);
+
+    document.querySelectorAll('.predict-choice, .draw-option').forEach(e => e.classList.remove('selected'));
+    currentPick = null;
+    submitBtn.disabled = true;
+    showTally(pick);
   });
 }());
 

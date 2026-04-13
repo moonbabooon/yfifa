@@ -169,6 +169,34 @@
     </div>
     <div class="draw-option" data-pick="draw">IT'S A DRAW &nbsp;·&nbsp; 90 MINS ISN'T ENOUGH</div>
     <button id="submit-prediction" disabled>LOCK IN MY PREDICTION</button>
+
+    <!-- Results view (shown after voting) -->
+    <div id="predict-results">
+      <div class="your-pick-row">
+        <span class="your-pick-label">Your prediction</span>
+        <span class="your-pick-value" id="your-pick-value">—</span>
+      </div>
+      <div class="tally-head">
+        <span class="tally-head-title">LIVE VOTES</span>
+        <span class="tally-head-total" id="tally-total">—</span>
+      </div>
+      <div class="tally-row">
+        <span class="tally-label">🍁 CANADA</span>
+        <div class="tally-bar-track"><div class="tally-bar-fill tally-bar-canada" id="bar-canada"></div></div>
+        <span class="tally-pct" id="pct-canada">—</span>
+      </div>
+      <div class="tally-row">
+        <span class="tally-label">💙 BOSNIA</span>
+        <div class="tally-bar-track"><div class="tally-bar-fill tally-bar-bosnia" id="bar-bosnia"></div></div>
+        <span class="tally-pct" id="pct-bosnia">—</span>
+      </div>
+      <div class="tally-row">
+        <span class="tally-label">🤝 DRAW</span>
+        <div class="tally-bar-track"><div class="tally-bar-fill tally-bar-draw" id="bar-draw"></div></div>
+        <span class="tally-pct" id="pct-draw">—</span>
+      </div>
+      <div class="tally-live-badge">● LIVE</div>
+    </div>
   </div>
 
   <!-- Programme overlay -->
